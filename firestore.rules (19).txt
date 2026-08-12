@@ -1,0 +1,326 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ⚠️ Set this to your real admin email before publishing. Same pattern
+    // as gating the NeilHunter admin panel to one Firebase account — no
+    // custom claims, no Node script, works immediately on next sign-in.
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email.lower() == 'olumideakintunde05@gmail.com'.lower();
+    }
+
+    // ---- Free-user contact gating helpers ----------------------------
+    // Used by businesses/{id}/private/contact below. Server-side only —
+    // this is what actually stops a free user from reading phone/whatsapp/
+    // email, regardless of anything the client does.
+    function isBusinessOwner(businessId) {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/businesses/$(businessId)).data.ownerUid == request.auth.uid;
+    }
+    function hasActivePaidPlan() {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.plan in ['pro', 'business'] &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.planStatus == 'active';
+    }
+
+    /* =====================================================================
+       CORE COLLECTIONS — businesses, products, services, notifications,
+       favorites, reviews. These existed before I started working on
+       upgrade/messages/trust-safety, and had no rules of their own in
+       anything I'd given you before — that's the other reason everything
+       was denied. These are reasonable defaults inferred from how every
+       page actually reads/writes them: businesses/products/services are
+       public to read (it's a directory — anyone browsing needs to see
+       them) and owner-only to write; notifications and favorites are
+       private to the user they belong to.
+       ===================================================================== */
+
+    // Collection-group read access for products/services. The nested rules
+    // inside `businesses/{businessId}/products/{productId}` below already
+    // govern normal reads/writes at that exact path, but admin.js also runs
+    // `db.collectionGroup('products')` / `db.collectionGroup('services')`
+    // queries (dashboard totals, the Featured Content panel) that scan
+    // across every business at once. Firestore does not reliably extend a
+    // nested subcollection rule to collection-group queries — it needs an
+    // explicit wildcard rule to actually authorize those scans, which is
+    // what was still causing permission-denied even after the nested rules
+    // and isAdmin() bypass were correct. Read-only, and identical in effect
+    // to the `allow read: if true` already declared per-business below.
+    match /{path=**}/products/{productId} {
+      allow read: if true;
+    }
+    match /{path=**}/services/{serviceId} {
+      allow read: if true;
+    }
+
+    match /businesses/{businessId} {
+      allow read: if true;
+      // phone/whatsapp/email are explicitly forbidden here — they live at
+      // businesses/{id}/private/contact instead (see below), which is the
+      // only path Free users can't read. This blocks that data from ever
+      // landing back on the public doc, even from a tampered client.
+      //
+      // Two ways to create a business: a normal user creating their own
+      // (ownerUid must be themselves), or admin creating an unclaimed
+      // listing (ownerUid is null — see the Claim Business feature).
+      allow create: if request.auth != null
+        && !request.resource.data.keys().hasAny(['phone', 'whatsapp', 'email'])
+        && (
+          (request.resource.data.ownerUid == request.auth.uid)
+          || (isAdmin() && request.resource.data.ownerUid == null && request.resource.data.createdBy == 'admin')
+        );
+      allow update: if request.auth != null && resource.data.ownerUid == request.auth.uid
+        && !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['verified', 'trustedSeller', 'suspended', 'banned', 'plan', 'featuredHome', 'phone', 'whatsapp', 'email',
+                     'ownerUid', 'claimed', 'claimStatus', 'createdBy']);
+      allow update: if isAdmin();
+      allow delete: if request.auth != null && resource.data.ownerUid == request.auth.uid;
+
+      // Contact gate — the actual enforcement point. Free users get
+      // permission-denied on this read no matter what the frontend does.
+      match /private/{docId} {
+        allow read: if isBusinessOwner(businessId) || isAdmin() || hasActivePaidPlan();
+        allow write: if isBusinessOwner(businessId) || isAdmin();
+      }
+
+      match /products/{productId} {
+        allow read: if true;
+        allow write: if request.auth != null &&
+          get(/databases/$(database)/documents/businesses/$(businessId)).data.ownerUid == request.auth.uid &&
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['featuredHome', 'featuredDirectory', 'adminHidden']);
+        // New fields for admin's Featured Content section and independent
+        // admin-side hide (separate from the owner's own `hidden` toggle,
+        // so an admin hiding a product can't be silently undone by the
+        // owner's next edit).
+        allow update: if isAdmin();
+      }
+
+      match /services/{serviceId} {
+        allow read: if true;
+        allow write: if request.auth != null &&
+          get(/databases/$(database)/documents/businesses/$(businessId)).data.ownerUid == request.auth.uid &&
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['featuredHome', 'featuredDirectory', 'adminHidden']);
+        allow update: if isAdmin();
+      }
+
+      match /dailyStats/{date} {
+        allow read: if request.auth != null &&
+          (request.auth.uid == get(/databases/$(database)/documents/businesses/$(businessId)).data.ownerUid
+           || isAdmin());
+        allow write: if request.auth != null; // any signed-in visitor triggers a view/click counter
+      }
+
+      // Following a business — this existed in business-profile.js's
+      // toggleFollow() from before any rules covered it at all, so every
+      // follow attempt was silently denied until now.
+      match /followers/{followerUid} {
+        allow read: if true;
+        allow create, delete: if request.auth != null && request.auth.uid == followerUid;
+      }
+
+      // Anyone can flip underInvestigation to true (a reporting user's own
+      // client sets it), but never back to false, and never combined with
+      // any other field in the same write.
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['underInvestigation'])
+        && request.resource.data.underInvestigation == true;
+
+      // Analytics counters — any signed-in visitor triggers these (that's
+      // the point, a view/click comes from whoever's looking), so this
+      // can't be owner-only. Scoped tightly to just the 'stats' field.
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stats', 'followersCount']);
+    }
+
+    match /notifications/{notificationId} {
+      allow read, update, delete: if request.auth != null && resource.data.recipientUid == request.auth.uid;
+      allow create: if request.auth != null;
+    }
+
+    match /favorites/{favoriteId} {
+      allow read, write: if request.auth != null && request.resource.data.uid == request.auth.uid;
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+
+    /* =====================================================================
+       USERS — profile, subscription-derived fields, and private subcollections.
+       ===================================================================== */
+
+    match /users/{uid} {
+      // Any signed-in user, not just the owner — messages.js's checkBlocked()
+      // needs to read the OTHER party's blockedUsers array before sending a
+      // message, and Firestore rules can't grant "read only this one field";
+      // it's the whole doc or nothing. Tradeoff: plan/planStatus/learningStats
+      // are now readable by any signed-in user too, not just the owner or
+      // admin. Nothing here is more sensitive than what already displays
+      // publicly via badges (verified/trustedSeller on the business itself),
+      // but flagging it since it's a real widening, not a free fix.
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.uid == uid;
+      // A user can edit their own profile, but never their own plan, payment
+      // status, or learning stats — those only change via admin approval.
+      allow update: if request.auth != null && request.auth.uid == uid
+        && !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['plan', 'planStatus', 'planExpiresAt', 'hasEverSubscribed', 'learningStats']);
+      // Also covers new suspended/banned moderation flags. NOTE: this only
+      // lets an admin SET these; actual enforcement (blocking a banned
+      // user from signing in or writing) needs a check in auth-guard.js,
+      // which isn't among this project's uploaded files, so it isn't
+      // wired up — setting the flag is real, stopping the user is not yet.
+      allow update: if isAdmin();
+
+      match /lessonProgress/{lessonId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+      match /certificates/{certId} {
+        allow read: if request.auth != null && request.auth.uid == uid;
+        allow write: if isAdmin();
+      }
+      match /blockedBusinesses/{businessId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+
+    /* =====================================================================
+       SUBSCRIPTIONS & PAYMENTS — bank transfer only, admin-approved only.
+       ===================================================================== */
+
+    match /subscriptions/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if isAdmin();
+
+      match /paymentHistory/{paymentId} {
+        allow read: if request.auth != null && request.auth.uid == uid;
+        allow write: if isAdmin();
+      }
+    }
+
+    match /plans/{planId} {
+      allow read: if request.auth != null;
+      // "create" only ever fires the first time this doc is written — once
+      // it exists, any further .set() is evaluated as "update" and only an
+      // admin can do that. This is what lets seedPlansIfMissing() in
+      // billing.js run for any signed-in user without opening plan pricing
+      // up to tampering after the fact.
+      allow create: if request.auth != null;
+      allow update, delete: if isAdmin();
+    }
+
+    // Bank transfer proof-of-payment submissions. A user can create their
+    // own pending request and read their own history, but can never mark
+    // it approved themselves, and can never touch someone else's request.
+    match /paymentVerifications/{paymentId} {
+      allow read: if request.auth != null &&
+        (request.auth.uid == resource.data.uid || isAdmin());
+      allow create: if request.auth != null &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.status == "pending";
+      allow update, delete: if isAdmin();
+    }
+
+    /* =====================================================================
+       LEARNING HUB
+       ===================================================================== */
+
+    match /lessons/{lessonId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    /* =====================================================================
+       MESSAGES
+       ===================================================================== */
+
+    match /conversations/{conversationId} {
+      // resource == null covers a .get() on a conversation that doesn't
+      // exist yet — the exact "check if this chat already exists before
+      // creating it" call in openOrCreateConversation(). Without this,
+      // Firestore has nothing to evaluate resource.data against and
+      // denies by default, which is what was breaking every first-time
+      // message to a business.
+      allow read: if request.auth != null && (resource == null || request.auth.uid in resource.data.participants);
+      // businessPhone/businessWhatsapp are explicitly forbidden — a chat
+      // doc is readable by any participant forever, which used to leak the
+      // real number to a Free buyer the moment they opened a chat. Only
+      // businessHasPhone/businessHasWhatsapp (booleans, no real data) are
+      // allowed; the real number is fetched live and gated per-tap instead.
+      allow create: if request.auth != null && request.auth.uid in request.resource.data.participants
+        && !request.resource.data.keys().hasAny(['businessPhone', 'businessWhatsapp']);
+      allow update: if request.auth != null && request.auth.uid in resource.data.participants
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['businessPhone', 'businessWhatsapp']);
+
+      match /messages/{messageId} {
+        allow read: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+        allow create: if request.auth != null && request.resource.data.senderUid == request.auth.uid
+          && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+        // Only the sender can edit their own message, and only to soft-delete it
+        allow update: if request.auth != null && resource.data.senderUid == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['deleted', 'deletedAt', 'text']);
+        // Any participant can mark a message as read
+        allow update: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy']);
+      }
+
+      match /typing/{uid} {
+        allow read: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+        allow write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+
+    /* =====================================================================
+       TRUST & SAFETY — reports and moderation audit log
+       ===================================================================== */
+
+    match /businessReports/{id} {
+      allow create: if request.auth != null && request.resource.data.reporterUid == request.auth.uid;
+      allow read: if request.auth != null && (resource.data.reporterUid == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+    match /productReports/{id} {
+      allow create: if request.auth != null && request.resource.data.reporterUid == request.auth.uid;
+      allow read: if request.auth != null && (resource.data.reporterUid == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+    match /userReports/{id} {
+      allow create: if request.auth != null && request.resource.data.reporterUid == request.auth.uid;
+      allow read: if request.auth != null && (resource.data.reporterUid == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+
+    match /moderationLogs/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    // Landing page newsletter signup (index.html) — anonymous visitors can
+    // submit an email, nothing else. No read access except admin, so
+    // submitted emails can't be scraped by other visitors.
+    match /newsletterSubscribers/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['email', 'createdAt'])
+        && request.resource.data.email is string
+        && request.resource.data.email.size() < 200;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Claim Business feature. Normal users can only ever create a claim for
+    // themselves as a pending request, and read their own claims. Approving
+    // or rejecting — the only path that can change status — is admin-only,
+    // enforced here server-side (not just in the UI). This is also what
+    // stops a user from approving their own claim or setting themselves as
+    // owner directly: they have no write path to businesses.ownerUid except
+    // through this admin-gated flow.
+    match /businessClaims/{claimId} {
+      allow create: if request.auth != null
+        && request.resource.data.claimantUid == request.auth.uid
+        && request.resource.data.status == 'pending';
+      allow read: if request.auth != null
+        && (resource.data.claimantUid == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+
+  }
+}

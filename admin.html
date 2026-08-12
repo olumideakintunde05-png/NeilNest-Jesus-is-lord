@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Admin — NeilNest</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { background: #000; height: 100%; }
+  body { font-family: -apple-system, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif; color: #fff; font-size: 14px; line-height: 1.4; }
+  a { text-decoration: none; color: inherit; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  a:active, button:active { opacity: 0.75; }
+  input, textarea, select { font-family: inherit; color: #fff; }
+
+  .layout { display: flex; min-height: 100dvh; max-width: 1400px; margin: 0 auto; }
+
+  .sidebar { width: 240px; flex-shrink: 0; background: #0a0a0a; border-right: 1px solid rgba(255,255,255,0.08); padding: 18px 12px; position: sticky; top: 0; height: 100dvh; overflow-y: auto; }
+  .sidebar-brand { font-size: 16px; font-weight: 800; padding: 8px 10px 18px; letter-spacing: 0.3px; }
+  .sidebar-brand span { color: #e0a83c; }
+  .nav-group-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #6e6e6e; padding: 14px 10px 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 10px; border-radius: 10px; font-size: 13px; font-weight: 600; color: #b8b8b8; width: 100%; text-align: left; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .nav-item.active { background: rgba(224,168,60,0.12); color: #e0a83c; }
+  .nav-badge { margin-left: auto; background: #c0392b; color: #ffe8e4; font-size: 9.5px; font-weight: 800; min-width: 17px; height: 17px; border-radius: 999px; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+
+  .sidebar-toggle { display: none; }
+
+  .main { flex: 1; min-width: 0; padding: 20px 24px 60px; }
+  .top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+  .page-title { font-size: 21px; font-weight: 800; }
+  .admin-email { font-size: 11.5px; color: #6e6e6e; }
+  .signout-btn { font-size: 12px; font-weight: 700; color: #f3a89e; padding: 8px 12px; border: 1px solid rgba(220,80,70,0.25); border-radius: 10px; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 24px; }
+  .stat-card { background: #101010; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 15px; }
+  .stat-card .num { font-size: 22px; font-weight: 800; color: #e0a83c; }
+  .stat-card .lbl { font-size: 11px; color: #a8a8a8; margin-top: 3px; }
+
+  .card { background: #101010; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+  .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+  .card-title { font-size: 14px; font-weight: 800; }
+  .card-sub { font-size: 11.5px; color: #a8a8a8; margin-top: 2px; }
+
+  .status-pill { font-size: 9.5px; font-weight: 800; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; flex-shrink: 0; white-space: nowrap; }
+  .status-pill--pending, .status-pill--investigating { background: rgba(224,168,60,0.18); color: #f0cf8e; }
+  .status-pill--approved, .status-pill--resolved, .status-pill--active { background: rgba(52,168,83,0.18); color: #8fe3a8; }
+  .status-pill--rejected, .status-pill--dismissed, .status-pill--suspended, .status-pill--banned { background: rgba(220,80,70,0.18); color: #f3a89e; }
+  .status-pill--trusted, .status-pill--featured { background: rgba(224,168,60,0.9); color: #1a1200; }
+  .status-pill--free { background: #262626; color: #b8b8b8; }
+
+  .kv-row { display: flex; justify-content: space-between; font-size: 12.5px; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 12px; }
+  .kv-row:last-of-type { border-bottom: none; }
+  .kv-row .k { color: #8a8a8a; flex-shrink: 0; }
+  .kv-row .v { font-weight: 600; text-align: right; word-break: break-word; }
+
+  .proof-thumb { width: 100%; max-height: 180px; object-fit: cover; border-radius: 12px; margin-top: 10px; cursor: pointer; }
+  .desc-block { font-size: 12.5px; color: #cfcfcf; background: #141414; border-radius: 10px; padding: 10px 12px; margin-top: 10px; line-height: 1.5; }
+
+  .btn-row { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .btn-sm { flex: 1; min-width: 90px; height: 40px; border-radius: 12px; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 10px; }
+  .btn-sm--approve { background: linear-gradient(135deg, #f0bd5a, #d99a2b); color: #1a1200; }
+  .btn-sm--reject { background: rgba(220,80,70,0.15); color: #f3a89e; border: 1px solid rgba(220,80,70,0.3); }
+  .btn-sm--outline { background: transparent; border: 1px solid rgba(255,255,255,0.12); color: #d8d8d8; }
+  .btn-sm--gold { background: rgba(224,168,60,0.14); color: #e0a83c; border: 1px solid rgba(224,168,60,0.3); }
+  .btn-sm[disabled] { opacity: 0.5; pointer-events: none; }
+
+  .search-bar { display: flex; align-items: center; gap: 9px; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px 14px; margin-bottom: 14px; }
+  .search-bar svg { width: 16px; height: 16px; color: #6e6e6e; flex-shrink: 0; }
+  .search-bar input { flex: 1; background: none; border: none; outline: none; font-size: 14px; }
+  .search-bar input::placeholder { color: #6e6e6e; }
+
+  .filter-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .filter-chip { flex-shrink: 0; padding: 7px 13px; border-radius: 999px; background: #141414; border: 1px solid rgba(255,255,255,0.08); font-size: 11.5px; font-weight: 700; color: #a8a8a8; }
+  .filter-chip.active { background: #e0a83c; color: #1a1200; border-color: #e0a83c; }
+
+  .load-more-btn { width: 100%; height: 44px; border-radius: 12px; background: #141414; border: 1px solid rgba(255,255,255,0.08); font-size: 12.5px; font-weight: 700; color: #d8d8d8; margin-top: 4px; }
+  .load-more-btn[disabled] { opacity: 0.5; }
+
+  .empty-note { text-align: center; color: #6e6e6e; font-size: 12.5px; padding: 40px 0; }
+  .skel { background: linear-gradient(90deg, #141414 25%, #1c1c1c 37%, #141414 63%); background-size: 400% 100%; animation: skel 1.4s ease infinite; border-radius: 16px; height: 90px; margin-bottom: 12px; }
+  @keyframes skel { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+
+  .gate-wrap { text-align: center; padding: 100px 20px; }
+  .gate-wrap svg { width: 40px; height: 40px; color: #e14b4b; margin-bottom: 16px; }
+  .gate-wrap h2 { font-size: 17px; font-weight: 800; margin-bottom: 8px; }
+  .gate-wrap p { font-size: 13px; color: #a8a8a8; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.open { display: flex; }
+  .modal-sheet { width: 100%; max-width: 440px; background: #0c0c0c; border-radius: 20px; padding: 20px; max-height: 88vh; overflow-y: auto; position: relative; }
+  .modal-sheet h3 { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+  .modal-sub { font-size: 12px; color: #a8a8a8; margin-bottom: 16px; }
+  .modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; }
+  .field-label { font-size: 12px; font-weight: 700; margin: 12px 0 6px; display: block; }
+  .text-input, textarea.reason-input, select.text-input {
+    width: 100%; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 13px;
+    padding: 12px 14px; font-size: 13.5px; outline: none; resize: none;
+  }
+  textarea.reason-input { min-height: 80px; }
+  .modal-submit-btn { width: 100%; height: 48px; border-radius: 14px; background: linear-gradient(135deg, #f0bd5a, #d99a2b); color: #1a1200; font-weight: 800; font-size: 14px; margin-top: 16px; }
+  .modal-submit-btn.danger { background: #c0392b; color: #ffe8e4; }
+  .full-image-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 350; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .full-image-modal.open { display: flex; }
+  .full-image-modal img { max-width: 100%; max-height: 90vh; border-radius: 8px; }
+
+  #toast-host { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); z-index: 400; display: flex; flex-direction: column; gap: 8px; width: calc(100% - 40px); max-width: 350px; }
+  .toast { display: flex; align-items: center; gap: 10px; background: #161616; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 13px 16px; font-size: 13px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+
+  @media (max-width: 780px) {
+    .sidebar { position: fixed; left: -260px; z-index: 200; transition: left 0.2s ease; box-shadow: 0 0 40px rgba(0,0,0,0.6); }
+    .sidebar.open { left: 0; }
+    .sidebar-toggle { display: flex; width: 38px; height: 38px; border-radius: 10px; background: #141414; align-items: center; justify-content: center; }
+    .main { padding: 16px 16px 50px; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="layout" id="layoutWrap" style="display:none;">
+
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-brand">Neil<span>Nest</span> Admin</div>
+
+    <button class="nav-item active" data-section="dashboard">📊 Dashboard</button>
+
+    <div class="nav-group-label">Marketplace</div>
+    <button class="nav-item" data-section="users">👥 Users</button>
+    <button class="nav-item" data-section="businesses">🏢 Businesses</button>
+    <button class="nav-item" data-section="addbusiness">➕ Add Business</button>
+    <button class="nav-item" data-section="claims">🏳️ Business Claims<span class="nav-badge" id="navClaimsBadge" style="display:none;"></span></button>
+    <button class="nav-item" data-section="products">📦 Products</button>
+    <button class="nav-item" data-section="services">🛠 Services</button>
+
+    <div class="nav-group-label">Money</div>
+    <button class="nav-item" data-section="payments">💳 Payments<span class="nav-badge" id="navPaymentsBadge" style="display:none;"></span></button>
+
+    <div class="nav-group-label">Trust & Safety</div>
+    <button class="nav-item" data-section="reports">🚨 Reports<span class="nav-badge" id="navReportsBadge" style="display:none;"></span></button>
+    <button class="nav-item" data-section="trusted">⭐ Trusted Sellers</button>
+    <button class="nav-item" data-section="investigations">⚠️ Investigations</button>
+
+    <div class="nav-group-label">Content</div>
+    <button class="nav-item" data-section="learning">📚 Learning Hub</button>
+    <button class="nav-item" data-section="featured">📌 Featured Content</button>
+    <button class="nav-item" data-section="notifications">🔔 Notifications</button>
+
+    <div class="nav-group-label">System</div>
+    <button class="nav-item" data-section="logs">📋 Moderation Logs</button>
+    <button class="nav-item" data-section="settings">⚙️ Settings</button>
+  </div>
+
+  <div class="main">
+    <div class="top-row">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        <div>
+          <div class="page-title" id="pageTitle">Dashboard</div>
+          <div class="admin-email" id="adminEmailLabel"></div>
+        </div>
+      </div>
+      <button class="signout-btn" id="signOutBtn">Sign Out</button>
+    </div>
+
+    <div class="section active" id="section-dashboard">
+      <div class="stat-grid" id="dashStatGrid"><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+      <h3 style="font-size:14px;font-weight:800;margin:20px 0 12px;">7-Day Platform Activity <span style="font-weight:400;color:#6e6e6e;font-size:11px;">(directional — visitor-writable counters, not audit-grade)</span></h3>
+      <div class="card" id="dashAnalyticsCard"><div class="empty-note">Loading…</div></div>
+      <h3 style="font-size:14px;font-weight:800;margin:20px 0 12px;">Recent Activity</h3>
+      <div id="dashActivityList"><div class="skel"></div></div>
+    </div>
+
+    <div class="section" id="section-users">
+      <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" id="usersSearchInput" placeholder="Search by name..."></div>
+      <div id="usersList"><div class="empty-note">Search for a user, or list recent sign-ups below.</div></div>
+      <button class="load-more-btn" id="usersLoadMoreBtn" style="display:none;">Load More</button>
+    </div>
+
+    <div class="section" id="section-businesses">
+      <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" id="businessSearchInput" placeholder="Search businesses by name..."></div>
+      <div id="businessesList"><div class="empty-note">Search for a business to view and moderate it.</div></div>
+    </div>
+
+    <div class="section" id="section-addbusiness">
+      <div class="card" id="addBizFormCard">
+        <div class="card-title" style="margin-bottom:14px;">Add a Business Listing</div>
+        <div class="card-sub" style="margin-bottom:16px;">Creates an unclaimed listing — no account is created for the owner. It appears in the directory immediately, and anyone claiming to be the owner can request to claim it from the profile page.</div>
+
+        <label class="field-label">Business Name *</label>
+        <input class="text-input" id="abName" placeholder="e.g. Wendy's House">
+        <label class="field-label">Category *</label>
+        <input class="text-input" id="abCategory" placeholder="e.g. Fashion Retail">
+        <label class="field-label">Description</label>
+        <textarea class="reason-input" id="abDescription" placeholder="Short description"></textarea>
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1;"><label class="field-label">State</label><input class="text-input" id="abState" placeholder="e.g. Lagos"></div>
+          <div style="flex:1;"><label class="field-label">City</label><input class="text-input" id="abCity" placeholder="e.g. Ikeja"></div>
+        </div>
+        <label class="field-label">Address</label>
+        <input class="text-input" id="abAddress" placeholder="Street address">
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1;"><label class="field-label">Phone</label><input class="text-input" id="abPhone" placeholder="080..."></div>
+          <div style="flex:1;"><label class="field-label">WhatsApp</label><input class="text-input" id="abWhatsapp" placeholder="080..."></div>
+        </div>
+        <label class="field-label">Email</label>
+        <input class="text-input" id="abEmail" placeholder="business@example.com">
+        <label class="field-label">Website</label>
+        <input class="text-input" id="abWebsite" placeholder="https://...">
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1;"><label class="field-label">Instagram</label><input class="text-input" id="abInstagram" placeholder="@handle"></div>
+          <div style="flex:1;"><label class="field-label">Facebook</label><input class="text-input" id="abFacebook" placeholder="facebook.com/..."></div>
+          <div style="flex:1;"><label class="field-label">TikTok</label><input class="text-input" id="abTiktok" placeholder="@handle"></div>
+        </div>
+        <label class="field-label">Opening Hours</label>
+        <input class="text-input" id="abHours" placeholder="e.g. Mon–Sat, 9am–6pm">
+        <label class="field-label">Logo</label>
+        <input type="file" accept="image/*" id="abLogoFile" class="text-input" style="padding:10px;">
+        <label class="field-label">Business Images</label>
+        <input type="file" accept="image/*" multiple id="abImagesFile" class="text-input" style="padding:10px;">
+
+        <button class="modal-submit-btn" id="abSubmitBtn" style="margin-top:18px;">Create Listing</button>
+      </div>
+
+      <div class="card" id="addBizSuccessCard" style="display:none;">
+        <div class="card-title" style="margin-bottom:8px;">Business created successfully.</div>
+        <div class="card-sub" style="margin-bottom:16px;">It's already visible throughout NeilNest. Share the claim link so the real owner can request ownership.</div>
+        <div class="btn-row">
+          <a class="btn-sm btn-sm--approve" id="abViewBtn" href="#" target="_blank" style="text-decoration:none;text-align:center;">View Business</a>
+          <button class="btn-sm" id="abCopyLinkBtn" style="background:#141414;color:#f2f2f2;">Copy Claim Link</button>
+        </div>
+        <button class="modal-submit-btn" id="abAddAnotherBtn" style="margin-top:14px;background:#141414;color:#f2f2f2;">Add Another Business</button>
+      </div>
+    </div>
+
+    <div class="section" id="section-claims">
+      <div class="filter-row" id="claimsFilter">
+        <button class="filter-chip active" data-status="pending">Pending</button>
+        <button class="filter-chip" data-status="approved">Approved</button>
+        <button class="filter-chip" data-status="rejected">Rejected</button>
+      </div>
+      <div id="claimsList"><div class="skel"></div><div class="skel"></div></div>
+    </div>
+
+    <div class="section" id="section-products">
+      <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" id="productsSearchInput" placeholder="Search by business name..."></div>
+      <div id="productsList"><div class="empty-note">Search a business to see and moderate its products.</div></div>
+    </div>
+
+    <div class="section" id="section-services">
+      <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" id="servicesSearchInput" placeholder="Search by business name..."></div>
+      <div id="servicesList"><div class="empty-note">Search a business to see and moderate its services.</div></div>
+    </div>
+
+    <div class="section" id="section-payments">
+      <div class="filter-row" id="paymentsFilter">
+        <button class="filter-chip active" data-status="pending">Pending</button>
+        <button class="filter-chip" data-status="approved">Approved</button>
+        <button class="filter-chip" data-status="rejected">Rejected</button>
+      </div>
+      <div id="paymentsList"><div class="skel"></div><div class="skel"></div></div>
+      <button class="load-more-btn" id="paymentsLoadMoreBtn" style="display:none;">Load More</button>
+    </div>
+
+    <div class="section" id="section-reports">
+      <div class="filter-row" id="reportsTypeFilter">
+        <button class="filter-chip active" data-type="all">All</button>
+        <button class="filter-chip" data-type="business">Business</button>
+        <button class="filter-chip" data-type="product">Product</button>
+        <button class="filter-chip" data-type="user">User</button>
+      </div>
+      <div class="filter-row" id="reportsStatusFilter">
+        <button class="filter-chip active" data-status="pending">Pending</button>
+        <button class="filter-chip" data-status="resolved">Resolved</button>
+        <button class="filter-chip" data-status="dismissed">Dismissed</button>
+      </div>
+      <div id="reportsList"><div class="skel"></div><div class="skel"></div></div>
+    </div>
+
+    <div class="section" id="section-trusted">
+      <div id="trustedList"><div class="skel"></div></div>
+    </div>
+
+    <div class="section" id="section-investigations">
+      <div id="investigationsList"><div class="skel"></div></div>
+    </div>
+
+    <div class="section" id="section-learning">
+      <button class="btn-sm btn-sm--approve" id="newLessonBtn" style="max-width:200px;margin-bottom:16px;">+ New Lesson</button>
+      <div id="lessonsList"><div class="skel"></div></div>
+    </div>
+
+    <div class="section" id="section-featured">
+      <div class="search-bar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" id="featuredSearchInput" placeholder="Search a business to feature its products..."></div>
+      <h3 style="font-size:13px;font-weight:800;margin:16px 0 10px;">Currently Featured</h3>
+      <div id="currentFeaturedList"><div class="empty-note">Nothing featured yet.</div></div>
+      <h3 style="font-size:13px;font-weight:800;margin:20px 0 10px;display:none;" id="featuredSearchResultsHeading">Search Results</h3>
+      <div id="featuredSearchResults"></div>
+    </div>
+
+    <div class="section" id="section-notifications">
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px;">Send Notification</div>
+        <label class="field-label">Target</label>
+        <select class="text-input" id="notifyTarget">
+          <option value="user">Specific user (by UID)</option>
+          <option value="plan">Everyone on a plan</option>
+        </select>
+        <div id="notifyUidWrap">
+          <label class="field-label">User UID</label>
+          <input class="text-input" id="notifyUid" placeholder="Firebase UID">
+        </div>
+        <div id="notifyPlanWrap" style="display:none;">
+          <label class="field-label">Plan</label>
+          <select class="text-input" id="notifyPlan">
+            <option value="free">Free</option>
+            <option value="pro">Pro</option>
+            <option value="business">Business</option>
+          </select>
+        </div>
+        <label class="field-label">Title</label>
+        <input class="text-input" id="notifyTitle" placeholder="Notification title">
+        <label class="field-label">Message</label>
+        <textarea class="reason-input" id="notifyBody" placeholder="Message body"></textarea>
+        <button class="modal-submit-btn" id="sendNotifyBtn">Send</button>
+      </div>
+    </div>
+
+    <div class="section" id="section-logs">
+      <div class="filter-row" id="logsFilter">
+        <button class="filter-chip active" data-action="all">All Actions</button>
+        <button class="filter-chip" data-action="suspend">Suspend</button>
+        <button class="filter-chip" data-action="ban">Ban</button>
+        <button class="filter-chip" data-action="award_trusted_seller">Trusted Awarded</button>
+        <button class="filter-chip" data-action="remove_trusted_seller">Trusted Removed</button>
+        <button class="filter-chip" data-action="warn">Warn</button>
+      </div>
+      <div id="logsList"><div class="skel"></div></div>
+      <button class="load-more-btn" id="logsLoadMoreBtn" style="display:none;">Load More</button>
+    </div>
+
+    <div class="section" id="section-settings">
+      <div class="card">
+        <div class="card-title" style="margin-bottom:10px;">Admin Access</div>
+        <div class="card-sub" style="margin-bottom:14px;">Signed in as <b id="settingsAdminEmail" style="color:#e0a83c;"></b>. Admin access is controlled by <code>isAdmin()</code> in firestore.rules — it checks this exact email. Changing who has admin access means editing that rule and republishing it, not anything in this UI (there are no admin-editable credentials on the client, by design).</div>
+        <div class="card-sub">Not exposed here, and never will be from the browser: Firebase API keys, Cloudinary upload secrets, or Firestore rules as editable text. Those live in firebase-init.js, billing.js, and the Firebase Console respectively.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="gate-wrap" id="gateWrap" style="display:none; padding-top:60px;">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:34px;height:34px;color:#e0a83c;"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+  <h2 style="margin-top:14px;">Admin Sign In</h2>
+  <p id="gateMessage">Sign in with the admin account.</p>
+  <div style="max-width:320px;margin:24px auto 0;text-align:left;">
+    <label class="field-label">Email</label>
+    <input class="text-input" id="adminLoginEmail" type="email" placeholder="admin@neilnest.com" autocomplete="username">
+    <label class="field-label">Password</label>
+    <input class="text-input" id="adminLoginPassword" type="password" placeholder="••••••••" autocomplete="current-password">
+    <button class="modal-submit-btn" id="adminLoginBtn" style="margin-top:18px;">Sign In</button>
+    <div id="adminLoginError" style="display:none;margin-top:12px;font-size:12.5px;color:#f3a89e;text-align:center;"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="reasonModal">
+  <div class="modal-sheet">
+    <button class="modal-close" id="closeReasonModal">&#10005;</button>
+    <h3 id="reasonModalTitle">Action</h3>
+    <div class="modal-sub" id="reasonModalSub">The affected party will be notified.</div>
+    <textarea class="reason-input" id="reasonModalInput" placeholder="Reason"></textarea>
+    <button class="modal-submit-btn danger" id="confirmReasonBtn">Confirm</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="lessonModal">
+  <div class="modal-sheet">
+    <button class="modal-close" id="closeLessonModal">&#10005;</button>
+    <h3 id="lessonModalTitle">New Lesson</h3>
+    <label class="field-label">Title</label>
+    <input class="text-input" id="lessonTitle" placeholder="Lesson title">
+    <label class="field-label">Category</label>
+    <input class="text-input" id="lessonCategory" placeholder="e.g. Marketing">
+    <label class="field-label">Description</label>
+    <textarea class="reason-input" id="lessonDescription" placeholder="Short description"></textarea>
+    <label class="field-label">Content URL</label>
+    <input class="text-input" id="lessonContentUrl" placeholder="Link to the lesson content">
+    <label class="field-label">Duration (minutes)</label>
+    <input class="text-input" id="lessonDuration" type="number" placeholder="15">
+    <label class="field-label">Order</label>
+    <input class="text-input" id="lessonOrder" type="number" placeholder="1">
+    <label class="field-label">Thumbnail</label>
+    <input type="file" id="lessonThumbnailInput" accept="image/*">
+    <img id="lessonThumbnailPreview" style="width:100%;max-height:140px;object-fit:cover;border-radius:10px;margin-top:8px;display:none;">
+    <label class="field-label" style="display:flex;align-items:center;gap:8px;"><input type="checkbox" id="lessonPublished"> Published</label>
+    <button class="modal-submit-btn" id="saveLessonBtn">Save Lesson</button>
+  </div>
+</div>
+
+<div class="full-image-modal" id="fullImageModal">
+  <img id="fullImageEl" src="" alt="">
+</div>
+
+<div id="toast-host"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="auth.js"></script>
+<script src="billing.js"></script>
+<script src="trustsafety-core.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

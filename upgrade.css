@@ -1,0 +1,224 @@
+/* ==========================================================================
+   upgrade.css — NeilNest Upgrade Plan page
+   Reuses the exact design tokens from add-product.html / business-profile.html:
+   black bg, #141414/#121212 card surfaces, #e0a83c gold accent, 14px radius.
+   ========================================================================== */
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { background: #000; height: 100%; }
+body {
+  font-family: -apple-system, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
+  color: #fff; font-size: 14px; line-height: 1.4;
+}
+a { text-decoration: none; color: inherit; touch-action: manipulation; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; touch-action: manipulation; }
+a, button { -webkit-user-select: none; user-select: none; }
+a:active, button:active { opacity: 0.72; }
+input, textarea, select { font-family: inherit; color: #fff; }
+
+.app-shell { max-width: 390px; margin: 0 auto; min-height: 100dvh; padding: 20px 20px 60px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+
+/* ---------- Header ---------- */
+.top-row { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+.back-btn { width: 38px; height: 38px; border-radius: 50%; background: #141414; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.top-title { font-size: 20px; font-weight: 800; }
+.top-subtitle { color: #a8a8a8; font-size: 13.5px; margin: 4px 0 22px 50px; }
+
+/* ---------- Section headings ---------- */
+.section-heading { font-size: 15px; font-weight: 800; margin: 28px 0 12px; }
+.section-sub { color: #a8a8a8; font-size: 12.5px; margin-top: -8px; margin-bottom: 14px; }
+
+/* ---------- Current plan card ---------- */
+.current-plan-card {
+  background: linear-gradient(160deg, #17140c, #0c0c0c);
+  border: 1px solid rgba(224,168,60,0.25); border-radius: 18px; padding: 18px;
+}
+.cp-row { display: flex; justify-content: space-between; align-items: flex-start; }
+.cp-label { font-size: 11px; color: #a8a8a8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+.cp-plan-name { font-size: 22px; font-weight: 800; margin-top: 4px; }
+.cp-status-pill {
+  font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px;
+  padding: 5px 10px; border-radius: 999px; white-space: nowrap;
+}
+.cp-status--active { background: rgba(52,168,83,0.18); color: #8fe3a8; }
+.cp-status--pending { background: rgba(224,168,60,0.18); color: #f0cf8e; }
+.cp-status--rejected { background: rgba(220,80,70,0.18); color: #f3a89e; }
+.cp-status--expired { background: rgba(220,80,70,0.18); color: #f3a89e; }
+.cp-status--free { background: #262626; color: #b8b8b8; }
+.cp-renewal { font-size: 12.5px; color: #a8a8a8; margin-top: 10px; }
+.cp-renewal b { color: #e0a83c; }
+.cp-benefits { margin-top: 14px; display: flex; flex-direction: column; gap: 7px; }
+.cp-benefit { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #d8d8d8; }
+.cp-benefit svg { width: 14px; height: 14px; color: #e0a83c; flex-shrink: 0; }
+
+/* ---------- Billing toggle ---------- */
+.billing-toggle {
+  display: flex; background: #141414; border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px; padding: 4px; margin: 18px 0 4px; position: relative;
+}
+.billing-toggle button {
+  flex: 1; padding: 10px 0; border-radius: 11px; font-size: 13px; font-weight: 700;
+  color: #a8a8a8; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: color 0.2s ease;
+}
+.billing-toggle button.active { color: #1a1200; }
+.billing-toggle__thumb {
+  position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px);
+  background: linear-gradient(135deg, #f0bd5a, #d99a2b); border-radius: 11px;
+  transition: transform 0.25s cubic-bezier(.4,0,.2,1); z-index: 0;
+}
+.billing-toggle button[data-cycle="yearly"].active ~ .billing-toggle__thumb,
+.billing-toggle.yearly .billing-toggle__thumb { transform: translateX(100%); }
+.save-chip { background: rgba(52,168,83,0.18); color: #8fe3a8; font-size: 9.5px; font-weight: 800; padding: 2px 6px; border-radius: 999px; }
+
+/* ---------- Plan cards ---------- */
+.plan-card {
+  background: #101010; border: 1px solid rgba(255,255,255,0.08); border-radius: 18px;
+  padding: 18px; margin-bottom: 14px; position: relative; overflow: hidden;
+}
+.plan-card--pro { border-color: rgba(224,168,60,0.4); }
+.plan-card--business { border: 1px solid rgba(224,168,60,0.6); background: linear-gradient(160deg, #17140c, #0c0c0c); }
+.plan-ribbon {
+  position: absolute; top: 14px; right: -32px; transform: rotate(40deg);
+  background: linear-gradient(135deg, #f0bd5a, #d99a2b); color: #1a1200;
+  font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px;
+  padding: 4px 36px; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+.plan-head { display: flex; justify-content: space-between; align-items: flex-start; }
+.plan-name { font-size: 17px; font-weight: 800; }
+.plan-price { font-size: 26px; font-weight: 800; margin-top: 6px; }
+.plan-price span { font-size: 12.5px; font-weight: 600; color: #a8a8a8; }
+.plan-price-note { font-size: 11px; color: #6e6e6e; margin-top: 2px; }
+.plan-features { margin: 16px 0; display: flex; flex-direction: column; gap: 9px; }
+.plan-feature { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #d8d8d8; }
+.plan-feature svg { width: 15px; height: 15px; color: #e0a83c; flex-shrink: 0; margin-top: 1px; }
+.plan-feature.social svg { color: #7a9fd6; }
+.plan-addon {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: rgba(224,168,60,0.08); border: 1px solid rgba(224,168,60,0.2);
+  border-radius: 12px; padding: 10px 12px; margin-bottom: 14px; font-size: 12px;
+}
+.plan-addon input[type="checkbox"] { width: 18px; height: 18px; accent-color: #e0a83c; }
+.plan-btn {
+  width: 100%; height: 50px; border-radius: 14px; font-weight: 800; font-size: 14px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.plan-btn--gold { background: linear-gradient(135deg, #f0bd5a, #d99a2b); color: #1a1200; }
+.plan-btn--outline { background: transparent; border: 1px solid rgba(255,255,255,0.15); color: #a8a8a8; }
+.plan-btn[disabled] { opacity: 0.55; pointer-events: none; }
+
+/* ---------- Comparison table ---------- */
+.compare-wrap { overflow-x: auto; margin: 0 -20px; padding: 0 20px 4px; -webkit-overflow-scrolling: touch; }
+.compare-table { border-collapse: collapse; width: 100%; min-width: 460px; }
+.compare-table th, .compare-table td { padding: 10px 8px; text-align: center; font-size: 11.5px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.compare-table th:first-child, .compare-table td:first-child { text-align: left; font-weight: 600; color: #d8d8d8; min-width: 160px; }
+.compare-table thead th { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.3px; color: #a8a8a8; padding-bottom: 12px; }
+.compare-table thead th.col-pro { color: #e0a83c; }
+.compare-table thead th.col-business { color: #f0cf8e; }
+.compare-table svg.yes { width: 15px; height: 15px; color: #e0a83c; }
+.compare-table svg.no { width: 13px; height: 13px; color: #4a4a4a; }
+
+/* ---------- Why upgrade grid ---------- */
+.why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.why-card { background: #101010; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 14px; }
+.why-card .ic { width: 34px; height: 34px; border-radius: 10px; background: rgba(224,168,60,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+.why-card .ic svg { width: 16px; height: 16px; color: #e0a83c; }
+.why-card .why-title { font-size: 12.5px; font-weight: 800; margin-bottom: 3px; }
+.why-card .why-desc { font-size: 11px; color: #a8a8a8; line-height: 1.4; }
+
+/* ---------- Payment history ---------- */
+.history-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: #101010; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 13px 15px; margin-bottom: 10px; }
+.history-item .h-plan { font-size: 13px; font-weight: 700; }
+.history-item .h-meta { font-size: 11px; color: #a8a8a8; margin-top: 2px; }
+.history-item .h-amount { font-size: 13px; font-weight: 700; text-align: right; }
+.h-status { font-size: 9.5px; font-weight: 800; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; margin-top: 4px; display: inline-block; }
+.h-status--pending { background: rgba(224,168,60,0.18); color: #f0cf8e; }
+.h-status--approved { background: rgba(52,168,83,0.18); color: #8fe3a8; }
+.h-status--rejected { background: rgba(220,80,70,0.18); color: #f3a89e; }
+.empty-note { text-align: center; color: #6e6e6e; font-size: 12.5px; padding: 20px 0; }
+
+/* ---------- Modals (matches business-profile.html's modal system) ---------- */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; display: none; align-items: flex-end; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal-sheet { width: 100%; max-width: 390px; background: #0c0c0c; border-radius: 20px 20px 0 0; padding: 20px; max-height: 90vh; overflow-y: auto; position: relative; }
+.modal-sheet h3 { font-size: 17px; font-weight: 800; margin-bottom: 4px; }
+.modal-sheet .modal-sub { font-size: 12.5px; color: #a8a8a8; margin-bottom: 18px; }
+.modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; }
+.modal-submit-btn { width: 100%; height: 50px; border-radius: 14px; background: linear-gradient(135deg, #f0bd5a, #d99a2b); color: #1a1200; font-weight: 800; font-size: 14px; }
+.modal-submit-btn[disabled] { opacity: 0.6; pointer-events: none; }
+.modal-outline-btn { width: 100%; height: 46px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.15); color: #d8d8d8; font-weight: 700; font-size: 13.5px; margin-top: 8px; }
+
+/* Bank details */
+.bank-row { display: flex; justify-content: space-between; align-items: center; background: #141414; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 13px 14px; margin-bottom: 10px; }
+.bank-row .br-label { font-size: 10.5px; color: #a8a8a8; text-transform: uppercase; letter-spacing: 0.3px; }
+.bank-row .br-value { font-size: 14.5px; font-weight: 700; margin-top: 2px; }
+.bank-row .copy-btn { width: 32px; height: 32px; border-radius: 9px; background: rgba(224,168,60,0.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.bank-row .copy-btn svg { width: 14px; height: 14px; color: #e0a83c; }
+.reference-notice { display: flex; gap: 9px; background: rgba(224,168,60,0.08); border: 1px solid rgba(224,168,60,0.25); border-radius: 12px; padding: 12px 13px; margin: 14px 0 18px; font-size: 11.5px; color: #f0cf8e; line-height: 1.5; }
+.reference-notice svg { width: 16px; height: 16px; color: #e0a83c; flex-shrink: 0; margin-top: 1px; }
+
+/* Verification form */
+.field-group { margin-bottom: 14px; }
+.field-label { font-size: 12.5px; font-weight: 700; margin-bottom: 7px; display: block; }
+.field-label .req { color: #e0a83c; }
+.text-input, textarea {
+  width: 100%; background: #141414; border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 13px; padding: 13px 14px; font-size: 14.5px; outline: none;
+  transition: border-color 0.15s ease;
+}
+.text-input:focus, textarea:focus { border-color: #d99a2b; }
+.text-input::placeholder, textarea::placeholder { color: #6e6e6e; }
+.text-input[readonly] { color: #e0a83c; font-weight: 700; }
+textarea { resize: none; min-height: 70px; }
+
+.proof-upload { border: 1.5px dashed rgba(255,255,255,0.15); border-radius: 13px; padding: 20px; text-align: center; cursor: pointer; }
+.proof-upload.has-image { padding: 0; border-style: solid; overflow: hidden; }
+.proof-upload img { width: 100%; max-height: 180px; object-fit: cover; display: block; }
+.proof-upload .ph-icon { width: 30px; height: 30px; color: #6e6e6e; margin: 0 auto 8px; }
+.proof-upload .ph-text { font-size: 12.5px; color: #a8a8a8; font-weight: 600; }
+.proof-upload .ph-sub { font-size: 11px; color: #6e6e6e; margin-top: 2px; }
+
+/* Success screen */
+.success-wrap { text-align: center; padding: 24px 6px 8px; }
+.success-icon { width: 68px; height: 68px; border-radius: 50%; background: rgba(52,168,83,0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
+.success-icon svg { width: 30px; height: 30px; color: #37c65f; }
+.success-title { font-size: 19px; font-weight: 800; margin-bottom: 8px; }
+.success-desc { font-size: 13px; color: #a8a8a8; line-height: 1.6; padding: 0 8px; }
+
+/* ---------- Toasts ---------- */
+#toast-host { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 8px; width: calc(100% - 40px); max-width: 350px; }
+.toast { display: flex; align-items: center; gap: 10px; background: #161616; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 13px 16px; font-size: 13px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+
+/* ---------- Skeleton loading ---------- */
+.skel { background: linear-gradient(90deg, #141414 25%, #1c1c1c 37%, #141414 63%); background-size: 400% 100%; animation: skel 1.4s ease infinite; border-radius: 12px; }
+@keyframes skel { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+
+/* =====================================================================
+   DESKTOP (≥960px) — sidebar nav, wider shell, plan cards go 3-column,
+   comparison table gets breathing room.
+===================================================================== */
+.desktop-sidebar { display: none; }
+@media (min-width: 960px) {
+  body { display: flex; }
+  .desktop-sidebar {
+    display: flex; flex-direction: column; gap: 4px;
+    position: fixed; left: 0; top: 0; bottom: 0; width: 232px;
+    padding: 24px 14px; background: #0a0a0a; border-right: 1px solid rgba(255,255,255,0.08);
+    z-index: 50;
+  }
+  .desktop-sidebar__brand { display: flex; align-items: center; gap: 10px; padding: 0 10px 22px; }
+  .desktop-sidebar__brand img { width: 34px; height: 34px; }
+  .desktop-sidebar__brand-name { font-size: 17px; font-weight: 700; }
+  .desktop-sidebar a.nav-item {
+    flex: none; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 12px;
+    padding: 12px 14px; border-radius: 12px; color: #a8a8a8;
+  }
+  .desktop-sidebar a.nav-item svg { width: 20px; height: 20px; }
+  .desktop-sidebar a.nav-item span { font-size: 14px; font-weight: 600; }
+  .desktop-sidebar a.nav-item:hover { background: rgba(255,255,255,0.05); }
+  .desktop-sidebar a.nav-item.active { background: rgba(224,168,60,0.12); color: #e0a83c; }
+
+  .app-shell { max-width: 1040px; margin: 0 0 0 232px; }
+  #plansWrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: start; }
+  .plan-card { margin-bottom: 0; }
+  #toast-host { left: calc(50% + 116px); }
+}

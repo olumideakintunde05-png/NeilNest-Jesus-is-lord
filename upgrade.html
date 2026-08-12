@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Upgrade Plan — NeilNest</title>
+<link rel="stylesheet" href="upgrade.css">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GH6R4GXT58"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-GH6R4GXT58');
+</script>
+</head>
+<body>
+
+<nav class="desktop-sidebar">
+  <div class="desktop-sidebar__brand">
+    <img src="logo.png" alt="" onerror="this.style.display='none'">
+    <span class="desktop-sidebar__brand-name">NeilNest</span>
+  </div>
+  <a href="home.html" class="nav-item" data-page="home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
+    <span>Home</span>
+  </a>
+  <a href="directory.html" class="nav-item" data-page="directory">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    <span>Directory</span>
+  </a>
+  <a href="add-business.html" class="nav-item" data-page="add-business">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
+    <span>Add Business</span>
+  </a>
+  <a href="messages.html" class="nav-item" data-page="messages">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v12H8l-4 4V4z"/></svg>
+    <span>Messages</span>
+  </a>
+  <a href="business-profile.html" class="nav-item" data-page="profile">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+    <span>Profile</span>
+  </a>
+</nav>
+
+<div class="app-shell" id="appShell">
+
+  <div class="top-row">
+    <button class="back-btn" id="backBtn" aria-label="Back">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div>
+      <div class="top-title">Upgrade Plan</div>
+    </div>
+  </div>
+  <div class="top-subtitle">Unlock premium business tools.</div>
+
+  <!-- Current Plan -->
+  <div class="current-plan-card" id="currentPlanCard">
+    <div class="cp-row">
+      <div>
+        <div class="cp-label">Current Plan</div>
+        <div class="cp-plan-name" id="cpPlanName">—</div>
+      </div>
+      <span class="cp-status-pill" id="cpStatusPill">—</span>
+    </div>
+    <div class="cp-renewal" id="cpRenewal" style="display:none;"></div>
+    <div class="cp-benefits" id="cpBenefits"></div>
+  </div>
+
+  <!-- Billing toggle -->
+  <div class="billing-toggle" id="billingToggle">
+    <button type="button" class="active" data-cycle="monthly">Monthly</button>
+    <button type="button" data-cycle="yearly">Yearly <span class="save-chip">Save 20%</span></button>
+    <div class="billing-toggle__thumb"></div>
+  </div>
+
+  <!-- Plans -->
+  <div id="plansWrap"></div>
+
+  <!-- Comparison table -->
+  <div class="section-heading">Compare Plans</div>
+  <div class="compare-wrap">
+    <table class="compare-table" id="compareTable"></table>
+  </div>
+
+  <!-- Why upgrade -->
+  <div class="section-heading">Why Upgrade</div>
+  <div class="why-grid" id="whyGrid"></div>
+
+  <!-- Payment history -->
+  <div class="section-heading">Payment History</div>
+  <div id="historyWrap"><div class="empty-note">No payments submitted yet.</div></div>
+
+  <div id="toast-host"></div>
+</div>
+
+<!-- Bank transfer modal -->
+<div class="modal-overlay" id="bankModal">
+  <div class="modal-sheet">
+    <button class="modal-close" id="closeBankModal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3>Bank Transfer</h3>
+    <div class="modal-sub" id="bankModalSub">NeilNest accepts bank transfer only.</div>
+
+    <div class="bank-row">
+      <div><div class="br-label">Bank Name</div><div class="br-value" id="bankName">—</div></div>
+    </div>
+    <div class="bank-row">
+      <div><div class="br-label">Account Name</div><div class="br-value" id="bankAccountName">—</div></div>
+    </div>
+    <div class="bank-row">
+      <div><div class="br-label">Account Number</div><div class="br-value" id="bankAccountNumber">—</div></div>
+      <button class="copy-btn" id="copyAccountBtn" aria-label="Copy account number"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
+    </div>
+    <div class="bank-row">
+      <div><div class="br-label">Amount</div><div class="br-value" id="bankAmount">₦0</div></div>
+    </div>
+    <div class="bank-row">
+      <div><div class="br-label">Reference Code</div><div class="br-value" id="bankReference">—</div></div>
+      <button class="copy-btn" id="copyReferenceBtn" aria-label="Copy reference code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg></button>
+    </div>
+
+    <div class="reference-notice">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+      <span><b>Important:</b> use the reference code above as your transfer narration. Without it, your payment may be delayed.</span>
+    </div>
+    <div id="bankSafetyNotice" style="display:flex;gap:9px;background:#141414;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 13px;margin-bottom:18px;font-size:10.5px;color:#8a8a8a;line-height:1.5;"></div>
+
+    <button class="modal-submit-btn" id="paidBtn">I've Made The Transfer</button>
+    <button class="modal-outline-btn" id="cancelBankBtn">Cancel</button>
+  </div>
+</div>
+
+<!-- Verification form modal -->
+<div class="modal-overlay" id="verifyModal">
+  <div class="modal-sheet">
+    <button class="modal-close" id="closeVerifyModal"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h3>Confirm Your Payment</h3>
+    <div class="modal-sub">Your plan won't be activated until an administrator verifies this payment.</div>
+
+    <div class="field-group">
+      <label class="field-label">Sender Name <span class="req">*</span></label>
+      <input type="text" class="text-input" id="vSenderName" placeholder="Name on the bank account">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Phone Number <span class="req">*</span></label>
+      <input type="tel" class="text-input" id="vPhone" placeholder="080…">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Amount Paid <span class="req">*</span></label>
+      <input type="number" class="text-input" id="vAmount" placeholder="0">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Transfer Date <span class="req">*</span></label>
+      <input type="date" class="text-input" id="vTransferDate">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Reference Code</label>
+      <input type="text" class="text-input" id="vReference" readonly>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Proof of Payment <span class="req">*</span></label>
+      <label class="proof-upload" id="proofUploadWrap" for="proofInput">
+        <svg class="ph-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <div class="ph-text">Tap to upload screenshot</div>
+        <div class="ph-sub">JPG or PNG, max 5MB</div>
+      </label>
+      <input type="file" accept="image/*" id="proofInput" style="display:none;">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Note <span style="color:#6e6e6e;font-weight:400;">(optional)</span></label>
+      <textarea id="vNote" placeholder="Anything else the admin should know"></textarea>
+    </div>
+
+    <button class="modal-submit-btn" id="submitVerifyBtn">Submit for Review</button>
+  </div>
+</div>
+
+<!-- Success modal -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal-sheet">
+    <div class="success-wrap">
+      <div class="success-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></div>
+      <div class="success-title">Payment Submitted</div>
+      <div class="success-desc">
+        Your payment is under review. Your account stays on the FREE plan until an administrator confirms it — you'll get a notification once it's approved. This usually takes up to 24 hours.
+      </div>
+      <button class="modal-submit-btn" id="returnToProfileBtn" style="margin-top:22px;">Return to Profile</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="auth-guard.js"></script>
+<script src="billing.js"></script>
+<script src="trustsafety-core.js"></script>
+<script src="upgrade.js"></script>
+</body>
+</html>

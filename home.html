@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>NeilNest · Home</title>
+<script src="theme.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  /* ---------- Theme tokens ----------
+     Same pattern/variable names as index.html so theme.js works identically
+     everywhere. Values differ slightly because this app view already had its
+     own established shade of purple (#8a6cff, brighter than the marketing
+     site's #6b4fd1) — kept as-is rather than forced to match, per "preserve
+     the existing implementation, only extend it". */
+  :root {
+    --bg: #000;
+    --surface-0: #0a0a0a;   /* desktop sidebar */
+    --surface-1: #101010;   /* dx-empty, dropdown panels, home-search */
+    --surface-2: #141414;   /* business-card, skel-card */
+    --surface-3: #1a1a1a;   /* image placeholders, category-icon */
+    --surface-4: #1e1e1e;   /* hover states, shimmer highlight */
+    --text-primary: #fff;
+    --text-secondary: #a8a8a8;
+    --text-faint: #7a7a7a;
+    --text-dim: #6e6e6e;
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.14);
+    --gold: #e0a83c;
+    --gold-deep: #d99a2b;
+    --gold-text-on: #1a1200;
+    --purple: #8a6cff;
+    --purple-soft: #c9a4ff;
+    --purple-wash: rgba(154,109,255,0.14);
+    --success: #37c65f;
+    --success-bg: #1e7d43;
+    --success-text: #e8fbef;
+    --danger: #e14b4b;
+  }
+  [data-theme="light"] {
+    --bg: #F7F7F9;
+    --surface-0: #FFFFFF;
+    --surface-1: #FFFFFF;
+    --surface-2: #FFFFFF;
+    --surface-3: #F0EFF3;
+    --surface-4: #E8E7EC;
+    --text-primary: #1A1A1E;
+    --text-secondary: #46424F;
+    --text-faint: #6B6875;
+    --text-dim: #8A8694;
+    --border: #E8E7EC;
+    --border-strong: #DAD8E0;
+    --gold: #C7862A;
+    --gold-deep: #B8791F;
+    --gold-text-on: #1a1200;
+    --purple: #6E4FD9;
+    --purple-soft: #6E4FD9;
+    --purple-wash: rgba(107,79,209,0.08);
+    --success: #157F41;
+    --success-bg: #DCFCE7;
+    --success-text: #15803D;
+    --danger: #D14343;
+  }
+  html, body { background: var(--bg); height: 100%; }
+  body {
+    font-family: -apple-system, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.4;
+    transition: background 0.25s ease, color 0.25s ease;
+  }
+  a { text-decoration: none; color: inherit; touch-action: manipulation; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; touch-action: manipulation; }
+  img { display: block; max-width: 100%; }
+  a, button { -webkit-user-select: none; user-select: none; }
+  a:active, button:active { opacity: 0.72; }
+
+
+  .app-shell {
+    max-width: 390px;
+    margin: 0 auto;
+    min-height: 100dvh;
+    position: relative;
+    background: var(--bg);
+    padding-bottom: 100px; /* room for the floating bottom nav */
+  }
+
+  /* ---------- Header ---------- */
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 12px;
+  }
+  .app-header__brand { display: flex; align-items: center; gap: 10px; }
+  .app-header__logo { width: 36px; height: 36px; flex-shrink: 0; }
+  .app-header__title { font-size: 19px; font-weight: 700; }
+  .app-header__tagline { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+  .app-header__actions { display: flex; align-items: center; gap: 14px; }
+  .icon-btn {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .badge-dot {
+    position: absolute; top: -2px; right: -2px;
+    min-width: 18px; height: 18px; padding: 0 4px;
+    border-radius: 999px; background: var(--gold); color: var(--gold-text-on);
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+  .avatar-wrap { position: relative; display: inline-block; }
+  .avatar-online-dot {
+    position: absolute; bottom: 0; right: 0; width: 11px; height: 11px;
+    border-radius: 50%; background: var(--success); border: 2px solid var(--bg);
+  }
+  .avatar-initials {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: var(--gold);
+    background: var(--surface-1); border: 1.5px solid var(--gold-deep);
+  }
+
+  /* ---------- Dropdown panels (notifications / profile / filter) ---------- */
+  .dropdown-overlay {
+    position: fixed; inset: 0; z-index: 199; display: none;
+  }
+  .dropdown-overlay.open { display: block; }
+
+  .dropdown-panel {
+    position: absolute; z-index: 200;
+    background: var(--surface-2); border: 1px solid var(--border-strong);
+    border-radius: 16px; box-shadow: 0 12px 34px rgba(0,0,0,0.55);
+    opacity: 0; transform: translateY(-6px) scale(0.98);
+    pointer-events: none; transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+  .dropdown-panel.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+
+  .notif-panel { top: 64px; right: 20px; width: 280px; overflow: hidden; }
+  .notif-panel__head {
+    padding: 14px 16px; font-weight: 700; font-size: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .notif-item { display: flex; gap: 10px; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); cursor: pointer; transition: background 0.15s ease; }
+  .notif-item:last-child { border-bottom: none; }
+  .notif-item:active, .notif-item:focus-visible { background: rgba(255,255,255,0.06); outline: none; }
+  .notif-item .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); margin-top: 6px; flex-shrink: 0; }
+  .notif-item .dot.read { background: transparent; }
+  .notif-item .title { font-size: 13px; font-weight: 600; }
+  .notif-item .time { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+
+  .profile-menu { top: 64px; right: 20px; width: 190px; padding: 8px; }
+  .profile-menu a {
+    width: 100%; display: flex; align-items: center; gap: 10px;
+    padding: 10px 10px; border-radius: 10px; font-size: 13.5px; font-weight: 600;
+    text-align: left; color: var(--text-primary);
+  }
+  .profile-menu a:active { background: rgba(255,255,255,0.06); opacity: 1; }
+  .profile-menu a svg { width: 16px; height: 16px; color: var(--gold); flex-shrink: 0; }
+  .profile-menu a.danger svg, .profile-menu a.danger { color: var(--danger); }
+  .profile-menu hr { border: none; border-top: 1px solid var(--border); margin: 6px 0; }
+
+  .filter-panel { top: 60px; left: 20px; right: 20px; width: auto; padding: 8px; }
+  .filter-panel button {
+    width: 100%; display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 12px; border-radius: 10px; font-size: 13.5px; font-weight: 600;
+  }
+  .filter-panel button:active { background: rgba(255,255,255,0.06); opacity: 1; }
+  .filter-panel button.selected { color: var(--gold); }
+  .filter-panel button.selected svg.check { display: inline-block; }
+  .filter-panel button svg.check { display: none; width: 15px; height: 15px; }
+
+  /* ---------- Search bar ---------- */
+  .home-search {
+    display: flex; align-items: center; gap: 10px; height: 52px;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 0 16px; margin: 0 20px 18px;
+  }
+  .home-search svg { width: 19px; height: 19px; color: var(--text-faint); flex-shrink: 0; }
+  .home-search input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--text-primary); font-size: 15px; min-width: 0;
+  }
+  .home-search input::placeholder { color: var(--text-dim); }
+  .home-search .divider { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
+  .home-search .filter-icon { color: var(--gold); }
+
+  /* ---------- Hero carousel (actually slides now) ---------- */
+  .hero-carousel {
+    margin: 0 20px 18px;
+    border: 1px solid rgba(122,92,255,0.25);
+    border-radius: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-track {
+    display: flex;
+    transition: transform 0.45s cubic-bezier(.4,0,.2,1);
+    will-change: transform;
+  }
+  .hero-slide {
+    flex: 0 0 100%;
+    background: linear-gradient(135deg, #1c1530 0%, #120c22 100%);
+    padding: 22px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: relative;
+  }
+  .hero-slide::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(122,92,255,0.25), transparent 55%);
+    pointer-events: none;
+  }
+  .hero-card__copy { max-width: 60%; position: relative; z-index: 1; }
+  .hero-card__copy h2 { font-size: 19px; font-weight: 800; line-height: 1.25; }
+  .hero-card__copy h2 .accent { color: var(--gold); }
+  .hero-card__copy p { font-size: 12.5px; color: var(--text-secondary); margin-top: 8px; line-height: 1.4; }
+  .hero-card__art { width: 100px; height: 100px; flex-shrink: 0; position: relative; z-index: 1; }
+  .hero-dots {
+    position: absolute; left: 22px; bottom: 14px; z-index: 2;
+    display: flex; gap: 6px;
+  }
+  .hero-dots button {
+    width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.25);
+    padding: 0; transition: width 0.25s ease, background 0.25s ease;
+  }
+  .hero-dots button.active { width: 18px; border-radius: 3px; background: var(--gold); }
+
+  /* ---------- Category row ---------- */
+  .home-section { padding: 0 20px; }
+  .category-row { display: flex; gap: 22px; overflow-x: auto; padding: 4px 4px 4px 0; scrollbar-width: none; }
+  .category-row::-webkit-scrollbar { display: none; }
+  .category-item { display: flex; flex-direction: column; align-items: center; gap: 8px; flex-shrink: 0; cursor: pointer; touch-action: manipulation; }
+  .category-item:active .category-icon { transform: scale(0.92); }
+  .category-icon {
+    width: 56px; height: 56px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface-3); border: 1.5px solid transparent; color: var(--text-secondary);
+  }
+  .category-icon svg { width: 22px; height: 22px; }
+  .category-item.active .category-icon { border-color: var(--gold); color: var(--gold); }
+  .category-item span { font-size: 11.5px; color: var(--text-secondary); }
+  .category-item.active span { color: var(--gold); font-weight: 600; }
+
+  .section-title-row {
+    display: flex; align-items: center; justify-content: space-between; margin: 22px 0 14px;
+  }
+  .section-title { font-size: 20px; font-weight: 700; }
+  .section-link { font-size: 13px; color: var(--gold); font-weight: 600; display: flex; align-items: center; gap: 3px; }
+
+  /* ---------- Business card ----------
+     Horizontal layout matching the mockup: square image on the left,
+     content stacked on the right. Image is a fixed box (not sized by
+     the photo) so odd source dimensions can never distort the card. */
+  .business-card {
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden; margin-bottom: 14px;
+    display: flex; gap: 12px; padding: 10px;
+  }
+  .business-card__image-wrap {
+    position: relative;
+    width: 104px; height: 104px; flex-shrink: 0;
+    border-radius: 12px;
+    background: var(--surface-3);
+    overflow: hidden;
+  }
+  .business-card__image-wrap img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .verified-pill {
+    position: absolute; top: 6px; left: 6px;
+    display: flex; align-items: center; gap: 4px;
+    background: var(--success-bg); color: var(--success-text);
+    font-size: 9.5px; font-weight: 600;
+    padding: 3px 7px 3px 5px; border-radius: 999px;
+    z-index: 2;
+  }
+  .verified-pill svg { width: 10px; height: 10px; }
+
+  .business-card__body {
+    flex: 1; min-width: 0;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 2px 2px 2px 0; gap: 8px;
+  }
+  .business-card__name { font-size: 15.5px; font-weight: 700; }
+  .business-card__category { font-size: 12.5px; color: var(--text-secondary); margin-top: 1px; }
+  .business-card__meta {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; color: var(--text-secondary); margin-top: 5px;
+  }
+  .business-card__meta svg { width: 12px; height: 12px; flex-shrink: 0; }
+  .business-card__rating { display: flex; align-items: center; gap: 4px; font-size: 12px; margin-top: 4px; }
+  .business-card__rating svg { width: 12px; height: 12px; flex-shrink: 0; }
+  .business-card__tags { display: flex; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
+
+  .desktop-sidebar { display: none; }
+  .desktop-extra-sections { display: none; }
+  .hero-cta { display: none; }
+  .business-view-btn { display: none; }
+
+  /* =====================================================================
+     DESKTOP (≥960px) — sidebar nav instead of bottom nav, content reflows
+     into a wider, multi-column layout. Mobile styles above are untouched;
+     everything below only applies at this breakpoint.
+  ===================================================================== */
+  @media (min-width: 960px) {
+    body { display: flex; }
+    .desktop-sidebar {
+      display: flex; flex-direction: column; gap: 4px;
+      position: fixed; left: 0; top: 0; bottom: 0; width: 232px;
+      padding: 24px 14px; background: var(--surface-0); border-right: 1px solid var(--border);
+      z-index: 50;
+    }
+    .desktop-sidebar__brand { display: flex; align-items: center; gap: 10px; padding: 0 10px 22px; }
+    .desktop-sidebar__brand img { width: 34px; height: 34px; }
+    .desktop-sidebar__brand-name { font-size: 17px; font-weight: 700; }
+    .desktop-sidebar a.nav-item {
+      flex: none; flex-direction: row; justify-content: flex-start; gap: 12px;
+      padding: 12px 14px; border-radius: 12px; color: var(--text-secondary); position: static;
+    }
+    .desktop-sidebar a.nav-item svg { width: 20px; height: 20px; }
+    .desktop-sidebar a.nav-item span:not(.nav-item__badge) { font-size: 14px; font-weight: 600; }
+    .desktop-sidebar a.nav-item.active { background: rgba(224,168,60,0.12); color: var(--gold); }
+    .desktop-sidebar a.nav-item:hover { background: rgba(255,255,255,0.05); }
+    .desktop-sidebar a.nav-item .nav-item__badge { position: static; margin-left: auto; }
+    .desktop-sidebar .nav-fab { margin-top: 6px; margin-bottom: 6px; }
+    .desktop-sidebar .nav-fab__circle { width: 40px; height: 40px; }
+
+    .bottom-nav { display: none !important; }
+
+    .app-shell {
+      max-width: 1400px; margin: 0 0 0 232px; padding-bottom: 40px;
+      min-height: 100vh;
+    }
+    .home-search, .hero-carousel { margin-left: 32px; margin-right: 32px; }
+    .home-section { padding: 0 32px; }
+    .app-header { padding: 24px 32px 14px; }
+
+    /* ---- Banner (hero-carousel) polish — same 3 slides, richer desktop treatment ---- */
+    .hero-carousel { border-radius: 24px; border-color: rgba(154,109,255,0.28); box-shadow: 0 25px 60px -25px rgba(154,109,255,0.3); }
+    .hero-slide { background: linear-gradient(120deg, #060606 0%, #1b1030 55%, #1e1440 100%) !important; padding: 38px 44px; }
+    .hero-slide::before { background: radial-gradient(circle at 85% 25%, rgba(154,109,255,0.32), transparent 60%); }
+    .hero-card__copy { max-width: 56%; }
+    .hero-card__copy h2 { font-size: 27px; line-height: 1.22; }
+    .hero-card__copy p { font-size: 14px; margin-top: 10px; }
+    .hero-card__art { width: 128px; height: 128px; }
+    .hero-cta {
+      display: inline-flex; align-items: center; gap: 6px; margin-top: 20px;
+      background: var(--gold); color: var(--gold-text-on); font-size: 13px; font-weight: 700;
+      padding: 11px 20px; border-radius: 11px; text-decoration: none; width: fit-content;
+    }
+    .hero-cta:hover { background: #f0ba4d; }
+
+    /* ---- Category nav polish — same items, same horizontal row ---- */
+    .category-row { gap: 30px; }
+    .category-icon { width: 62px; height: 62px; transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease; }
+    .category-item:hover .category-icon { transform: translateY(-3px); background: var(--surface-4); border-color: rgba(224,168,60,0.35); }
+    .category-item.active .category-icon { background: rgba(224,168,60,0.1); box-shadow: 0 0 0 1px rgba(224,168,60,0.3), 0 8px 20px -8px rgba(224,168,60,0.5); }
+    .category-item span { font-size: 12.5px; }
+
+    /* ---- Business card polish — image-top card, richer content, View Profile action ---- */
+    #business-list { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+    #business-list .business-card { margin-bottom: 0; }
+    .business-card { flex-direction: column; padding: 0; border-radius: 18px; transition: transform 0.18s ease, border-color 0.18s ease; }
+    .business-card:hover { transform: translateY(-3px); border-color: rgba(224,168,60,0.3); }
+    .business-card__image-wrap { width: 100%; height: 170px; border-radius: 18px 18px 0 0; }
+    .business-card__body { padding: 14px 16px 16px; }
+    .business-view-btn {
+      display: block; text-align: center; margin: 12px 16px 16px; padding: 9px;
+      border: 1px solid rgba(255,255,255,0.14); border-radius: 10px;
+      font-size: 12.5px; font-weight: 600; color: var(--text-primary); text-decoration: none;
+    }
+    .business-view-btn:hover { border-color: rgba(224,168,60,0.4); color: var(--gold); }
+
+    /* ---- New desktop-only sections (Recently Added / Near You / Popular
+       Categories / Recently Viewed) — entirely hidden on mobile via the
+       wrapper below; only ever shown at this breakpoint. ---- */
+    .desktop-extra-sections { display: block; }
+    .dx-section { margin-top: 34px; }
+    .dx-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .dx-head h2 { font-size: 20px; font-weight: 700; }
+    .dx-head p { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+    .dx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; margin-top: 18px; }
+    .dx-empty {
+      grid-column: 1 / -1; text-align: center; padding: 34px 20px; color: var(--text-faint); font-size: 13.5px;
+      background: var(--surface-1); border: 1px dashed var(--border-strong); border-radius: 16px; margin-top: 18px;
+    }
+    .dx-empty a { color: var(--gold); font-weight: 700; text-decoration: none; }
+    .dx-cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 18px; }
+    .dx-cat-card {
+      display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 20px;
+      background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px;
+      text-decoration: none; color: inherit; transition: transform 0.18s ease, border-color 0.18s ease;
+    }
+    .dx-cat-card:hover { transform: translateY(-3px); border-color: rgba(224,168,60,0.3); }
+    .dx-cat-card .icon { width: 40px; height: 40px; border-radius: 11px; background: var(--purple-wash); color: var(--purple-soft); display: flex; align-items: center; justify-content: center; }
+    .dx-cat-card span { font-size: 13.5px; font-weight: 600; }
+  }
+  .tag { font-size: 10.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+  .tag--beauty { background: rgba(139,92,246,0.18); color: #c9b3ff; }
+  .tag--retail { background: rgba(196,106,90,0.18); color: #e3a596; }
+  .tag--realestate { background: rgba(66,133,244,0.18); color: #9dc0ff; }
+  .tag--hospitality { background: rgba(52,168,83,0.18); color: #8fe3a8; }
+  .tag--food { background: rgba(224,168,60,0.18); color: #f0cf8e; }
+
+  .business-card__image-wrap.img-error { display: flex; align-items: center; justify-content: center; }
+  .business-card__image-wrap.img-error img { display: none; }
+  .business-card__image-wrap.img-error::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(135deg, var(--surface-4), var(--surface-2));
+  }
+
+  .bookmark-btn {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold); flex-shrink: 0;
+  }
+  .bookmark-btn svg { width: 16px; height: 16px; }
+
+  /* ---------- Bottom nav ---------- */
+  .bottom-nav {
+    position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%);
+    width: calc(100% - 24px); max-width: 366px; height: 66px;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 22px; display: flex; align-items: center;
+    justify-content: space-around; padding: 0 6px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+    z-index: 100;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    flex: 1; color: var(--text-secondary); font-size: 10.5px; font-weight: 500; position: relative;
+  }
+  .nav-item svg { width: 22px; height: 22px; }
+  .nav-item.active { color: var(--gold); }
+  .nav-fab { justify-content: flex-start; }
+  .nav-fab__circle {
+    width: 50px; height: 50px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #f0bd5a, #d99a2b);
+    display: flex; align-items: center; justify-content: center;
+    margin-top: -30px; box-shadow: 0 6px 18px rgba(224,168,60,0.45), 0 0 0 5px var(--surface-1);
+  }
+  .nav-fab__circle svg { width: 24px; height: 24px; color: var(--gold-text-on); }
+  .nav-item__badge {
+    position: absolute; top: -6px; right: 12px;
+    min-width: 16px; height: 16px; padding: 0 4px;
+    border-radius: 999px; background: var(--gold); color: var(--gold-text-on);
+    font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+/* ---------- Featured Businesses loading skeleton ---------- */
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.skel-card { display:flex; gap:12px; padding:12px; border-radius:16px; background:var(--surface-2); margin-bottom:12px; }
+.skel-block { border-radius:10px; background: linear-gradient(90deg, var(--surface-3) 25%, var(--surface-4) 37%, var(--surface-3) 63%); background-size: 400% 100%; animation: shimmer 1.4s ease-in-out infinite; }
+.skel-card .skel-img { width:88px; height:88px; flex-shrink:0; }
+.skel-card .skel-lines { flex:1; display:flex; flex-direction:column; gap:8px; padding-top:4px; }
+.skel-card .skel-line { height:11px; }
+.skel-card .skel-line--sm { width:60%; }
+.skel-card .skel-line--md { width:85%; }
+.skel-card .skel-line--lg { width:100%; }
+
+/* ---------- Light-mode overrides for hand-tuned decorative sections ----------
+   Same reasoning as index.html: bespoke redesigns for gradients/illustration,
+   not a blanket color inversion. */
+[data-theme="light"] .hero-slide { background: linear-gradient(135deg, #EDE7FB 0%, #F3EEFF 100%) !important; }
+[data-theme="light"] .hero-slide::before { background: radial-gradient(circle at 80% 20%, rgba(107,79,209,0.14), transparent 55%); }
+[data-theme="light"] .hero-carousel { border-color: rgba(107,79,209,0.22); }
+[data-theme="light"] .hero-card__copy h2,
+[data-theme="light"] .hero-card__copy p { color: var(--text-primary); }
+
+/* Category tags: dark mode uses a translucent-dark-bg + pale-text combo that
+   has no contrast on white, so light mode gets solid pastel tints + darker,
+   more saturated text instead — same five hues, redesigned for a light surface. */
+[data-theme="light"] .tag--beauty { background: #F0E9FF; color: #6D28D9; }
+[data-theme="light"] .tag--retail { background: #FBEAE7; color: #B0473A; }
+[data-theme="light"] .tag--realestate { background: #E8F0FE; color: #1D4ED8; }
+[data-theme="light"] .tag--hospitality { background: #E7F6EC; color: #15803D; }
+[data-theme="light"] .tag--food { background: #FCF1DE; color: #A9660D; }
+
+[data-theme="light"] .dropdown-panel { box-shadow: 0 12px 34px rgba(30,20,60,0.12); }
+[data-theme="light"] .business-card { box-shadow: 0 1px 3px rgba(30,20,60,0.05); }
+[data-theme="light"] .desktop-sidebar a.nav-item:hover { background: rgba(20,15,35,0.045); }
+[data-theme="light"] .category-item:hover .category-icon { background: var(--surface-4); }
+</style>
+</head>
+<body>
+
+<nav class="desktop-sidebar">
+  <div class="desktop-sidebar__brand">
+    <img src="logo.png" alt="" onerror="this.style.display='none'">
+    <span class="desktop-sidebar__brand-name">NeilNest</span>
+  </div>
+  <a href="home.html" class="nav-item active" data-page="home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
+    <span>Home</span>
+  </a>
+  <a href="directory.html" class="nav-item" data-page="directory">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    <span>Directory</span>
+  </a>
+  <a href="add-business.html" class="nav-item" data-page="add-business">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
+    <span>Add Business</span>
+  </a>
+  <a href="messages.html" class="nav-item" data-page="messages" style="position:relative;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v12H8l-4 4V4z"/></svg>
+    <span>Messages</span>
+    <span class="nav-item__badge">2</span>
+  </a>
+  <a href="business-profile.html" class="nav-item" data-page="profile">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+    <span>Profile</span>
+  </a>
+</nav>
+
+<div class="app-shell">
+
+  <header class="app-header">
+    <div class="app-header__brand">
+      <svg class="app-header__logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#f0c25c"/><stop offset="100%" stop-color="#d99a2b"/>
+          </linearGradient>
+          <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#8a6cff"/><stop offset="100%" stop-color="#5a3ccf"/>
+          </linearGradient>
+        </defs>
+        <path d="M10 46 L10 18 L32 40 L32 46 L10 46 Z" fill="url(#purpleGrad)"/>
+        <path d="M10 18 L18 18 L54 46 L46 46 L10 18 Z" fill="url(#goldGrad)"/>
+        <path d="M32 24 L54 46 L54 18 L46 18 L46 30 L32 18 Z" fill="url(#goldGrad)"/>
+      </svg>
+      <div>
+        <div class="app-header__title">NeilNest</div>
+        <div class="app-header__tagline">Connect. Grow. Thrive.</div>
+      </div>
+    </div>
+    <div class="app-header__actions">
+      <button class="icon-btn" id="bellBtn">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        <span class="badge-dot" id="bellBadge">3</span>
+      </button>
+      <button class="avatar-wrap" id="avatarBtn" style="background:none;">
+        <div class="avatar-initials" id="avatarInitials">–</div>
+        <span class="avatar-online-dot"></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="dropdown-panel notif-panel" id="notifPanel">
+    <div class="notif-panel__head">Notifications</div>
+    <div id="notifList"><div class="notif-empty" style="padding:20px 16px;text-align:center;font-size:12.5px;color:var(--text-faint);">Loading…</div></div>
+  </div>
+
+  <div class="dropdown-panel profile-menu" id="profileMenu">
+    <a href="business-profile.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      View Profile
+    </a>
+    <a href="settings.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9M4.6 9a1.7 1.7 0 0 0-.3-1.9"/></svg>
+      Settings
+    </a>
+    <hr>
+    <a href="#" class="danger" id="logoutBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Log Out
+    </a>
+  </div>
+
+  <div class="home-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+    <input type="text" id="searchInput" placeholder="Search businesses, products or services...">
+    <div class="divider"></div>
+    <button class="icon-btn filter-icon" id="filterBtn" style="width:auto; height:auto; padding:0;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M8 12h12M4 18h8"/><circle cx="6" cy="6" r="1.6" fill="currentColor"/><circle cx="16" cy="12" r="1.6" fill="currentColor"/><circle cx="10" cy="18" r="1.6" fill="currentColor"/></svg>
+    </button>
+  </div>
+
+  <div class="dropdown-panel filter-panel" id="filterPanel">
+    <button type="button" class="sort-option selected" data-sort="featured">Featured <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+    <button type="button" class="sort-option" data-sort="rating">Highest rated <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+    <button type="button" class="sort-option" data-sort="reviews">Most reviewed <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+    <button type="button" class="sort-option" data-sort="verified">Verified only <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+  </div>
+
+  <div class="hero-carousel" id="heroCarousel">
+    <div class="hero-track" id="heroTrack">
+
+      <!-- Slide 1 -->
+      <div class="hero-slide">
+        <div class="hero-card__copy">
+          <h2>Discover trusted <span class="accent">businesses near you</span></h2>
+          <p>Connect, collaborate and grow your business network.</p>
+          <a href="directory.html" class="hero-cta">Browse Directory<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <svg class="hero-card__art" viewBox="0 0 100 100">
+          <defs>
+            <linearGradient id="awning1" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#c9baff"/><stop offset="100%" stop-color="#8a6cff"/>
+            </linearGradient>
+          </defs>
+          <rect x="16" y="20" width="68" height="20" rx="3" fill="url(#awning1)"/>
+          <path d="M16 40 L24 48 L32 40 L40 48 L48 40 L56 48 L64 40 L72 48 L80 40 L84 40 L84 40 L84 40" fill="none" stroke="url(#awning1)" stroke-width="0"/>
+          <path d="M16 40 Q22 48 28 40 Q34 48 40 40 Q46 48 52 40 Q58 48 64 40 Q70 48 76 40 Q80 44 84 40 L84 40 L16 40 Z" fill="#8a6cff"/>
+          <rect x="22" y="42" width="56" height="46" rx="3" fill="#2a1f5c"/>
+          <rect x="27" y="50" width="16" height="16" rx="2" fill="#c9baff"/>
+          <path d="M27 58h16M35 50v16" stroke="#2a1f5c" stroke-width="1.4"/>
+          <rect x="57" y="50" width="16" height="16" rx="2" fill="#c9baff"/>
+          <path d="M57 58h16M65 50v16" stroke="#2a1f5c" stroke-width="1.4"/>
+          <rect x="42" y="66" width="16" height="22" rx="2" fill="#160f33"/>
+          <circle cx="50" cy="77" r="1.4" fill="#c9baff"/>
+          <ellipse cx="21" cy="86" rx="6" ry="3" fill="#3a2d70"/>
+          <path d="M21 76c-4 2-5 7-2 10 2-4 2-8 2-10z" fill="#4ade80"/>
+          <path d="M21 76c4 2 5 7 2 10-2-4-2-8-2-10z" fill="var(--success)"/>
+          <ellipse cx="79" cy="86" rx="6" ry="3" fill="#3a2d70"/>
+          <path d="M79 76c-4 2-5 7-2 10 2-4 2-8 2-10z" fill="#4ade80"/>
+          <path d="M79 76c4 2 5 7 2 10-2-4-2-8-2-10z" fill="var(--success)"/>
+        </svg>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="hero-slide">
+        <div class="hero-card__copy">
+          <h2>List your business in <span class="accent">under 5 minutes</span></h2>
+          <p>Reach thousands of customers actively searching right now.</p>
+          <a href="add-business.html" class="hero-cta">List Your Business<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <svg class="hero-card__art" viewBox="0 0 100 100">
+          <rect x="18" y="26" width="64" height="56" rx="8" fill="#2a1f5c"/>
+          <rect x="26" y="36" width="48" height="6" rx="3" fill="var(--gold)"/>
+          <rect x="26" y="48" width="34" height="5" rx="2.5" fill="#8a6cff"/>
+          <rect x="26" y="58" width="40" height="5" rx="2.5" fill="#5a4a99"/>
+          <circle cx="66" cy="70" r="10" fill="var(--success)"/>
+          <path d="M61 70l3.5 3.5L72 65" stroke="#0e0e0e" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="hero-slide">
+        <div class="hero-card__copy">
+          <h2>Grow your network with <span class="accent">real connections</span></h2>
+          <p>Message, follow and partner with verified businesses.</p>
+          <a href="directory.html" class="hero-cta">Explore Businesses<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <svg class="hero-card__art" viewBox="0 0 100 100">
+          <circle cx="36" cy="40" r="14" fill="#8a6cff"/>
+          <circle cx="66" cy="40" r="14" fill="var(--gold)"/>
+          <path d="M22 82c0-13 8-22 14-22s14 9 14 22" fill="#5a3ccf"/>
+          <path d="M52 82c0-13 8-22 14-22s14 9 14 22" fill="#c78a24"/>
+          <path d="M46 46l8 0" stroke="var(--success)" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+    </div>
+    <div class="hero-dots" id="heroDots">
+      <button class="active" data-i="0" aria-label="Slide 1"></button>
+      <button data-i="1" aria-label="Slide 2"></button>
+      <button data-i="2" aria-label="Slide 3"></button>
+    </div>
+  </div>
+
+  <div class="home-section">
+    <div class="category-row">
+      <div class="category-item active" data-cat="All">
+        <div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+        <span>All</span>
+      </div>
+      <div class="category-item" data-cat="Real Estate">
+        <div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9h4v-6h6v6h4v-9"/></svg></div>
+        <span>Real Estate</span>
+      </div>
+      <div class="category-item" data-cat="Hospitality">
+        <div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 20h18"/><path d="M5 20V9l7-5 7 5v11"/><circle cx="12" cy="13" r="2"/></svg></div>
+        <span>Hospitality</span>
+      </div>
+      <div class="category-item" data-cat="Beauty">
+        <div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="9" r="3"/><path d="M4 20c0-3 2.5-5 5-5s5 2 5 5"/><path d="M17 6l1.5 3L21 10l-2.5 1L17 14l-1.5-3L13 10l2.5-1z"/></svg></div>
+        <span>Beauty</span>
+      </div>
+      <div class="category-item" data-cat="Retail">
+        <div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></div>
+        <span>Retail</span>
+      </div>
+      <div class="category-item" data-cat="Food & Beverages">
+        <div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="19" cy="12" r="1.4" fill="currentColor"/></svg></div>
+        <span>More</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="home-section">
+    <div class="section-title-row">
+      <div class="section-title">Featured Businesses</div>
+      <button type="button" class="section-link" id="seeAllBtn">See all
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+
+    <!-- Cards are rendered from real Firestore businesses via a live listener
+         (startBusinessListener) further down in <script>. New businesses show
+         up here automatically — no manual refresh, no hardcoded data. -->
+    <div id="business-list">
+      <div class="skel-card"><div class="skel-block skel-img"></div><div class="skel-lines"><div class="skel-block skel-line skel-line--md"></div><div class="skel-block skel-line skel-line--sm"></div><div class="skel-block skel-line skel-line--lg"></div></div></div>
+      <div class="skel-card"><div class="skel-block skel-img"></div><div class="skel-lines"><div class="skel-block skel-line skel-line--md"></div><div class="skel-block skel-line skel-line--sm"></div><div class="skel-block skel-line skel-line--lg"></div></div></div>
+      <div class="skel-card"><div class="skel-block skel-img"></div><div class="skel-lines"><div class="skel-block skel-line skel-line--md"></div><div class="skel-block skel-line skel-line--sm"></div><div class="skel-block skel-line skel-line--lg"></div></div></div>
+    </div>
+    <div id="no-results" style="display:none; text-align:center; padding:30px 0; color:var(--text-faint); font-size:13.5px;">No businesses match this filter yet.</div>
+  </div>
+
+  <!-- Desktop-only sections. Hidden entirely on mobile (.desktop-extra-sections
+       default display:none) — nothing here affects mobile spacing or layout. -->
+  <div class="desktop-extra-sections">
+    <div class="home-section dx-section">
+      <div class="dx-head">
+        <div><h2>Recently Added</h2><p>Discover businesses that just joined NeilNest.</p></div>
+        <button type="button" class="section-link" id="dxRecentSeeAll">See all
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+      <div class="dx-grid" id="dxRecentGrid"></div>
+    </div>
+
+    <div class="home-section dx-section">
+      <div class="dx-head">
+        <div><h2>Businesses Near You</h2><p>Find businesses serving your area.</p></div>
+        <button type="button" class="section-link" id="dxNearSeeAll">View all
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+      <div class="dx-grid" id="dxNearGrid"></div>
+    </div>
+
+    <div class="home-section dx-section">
+      <div class="dx-head"><div><h2>Popular Categories</h2></div></div>
+      <div class="dx-cat-grid" id="dxCatGrid"></div>
+    </div>
+
+    <div class="home-section dx-section">
+      <div class="dx-head"><div><h2>Recently Viewed</h2></div></div>
+      <div class="dx-grid" id="dxViewedGrid"></div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="home.html" class="nav-item active" data-page="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
+      <span>Home</span>
+    </a>
+    <a href="directory.html" class="nav-item" data-page="directory">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      <span>Directory</span>
+    </a>
+    <a href="add-business.html" class="nav-item nav-fab" data-page="add-business" aria-label="Add Business">
+      <span class="nav-fab__circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+      </span>
+    </a>
+    <a href="messages.html" class="nav-item" data-page="messages" style="position:relative;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v12H8l-4 4V4z"/></svg>
+      <span>Messages</span>
+      <span class="nav-item__badge">2</span>
+    </a>
+    <a href="business-profile.html" class="nav-item" data-page="profile">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div>
+
+<script>
+  // =========================================================================
+  // Business data + card template
+  // This is the "structure" — one object in, one card out, every time.
+  // Adding a business (from a form, an API response, wherever) is just:
+  //   businesses.push({ ...same shape... }); renderBusinessList();
+  // =========================================================================
+  // Real businesses come from Firestore now — the array below is populated
+  // and re-rendered live by startBusinessListener() further down, never by
+  // hand. See CATEGORY_TAXONOMY for how a business's free-text `category`
+  // maps to the filter chips / colored tags this UI needs.
+  let businesses = [];
+
+  const CATEGORY_TAXONOMY = [
+    { test: /real estate|apartment|shortlet|property|estate agency/i, filterCat: "Real Estate", tag: { label: "Real Estate", cls: "realestate" } },
+    { test: /hotel|hospitality|bar\b|lounge|gym|fitness|spa|studio|photography|event/i, filterCat: "Hospitality", tag: { label: "Hospitality", cls: "hospitality" } },
+    { test: /beauty|salon|fragrance|cosmetic|makeup|skincare/i, filterCat: "Beauty", tag: { label: "Beauty", cls: "beauty" } },
+    { test: /retail|boutique|store|shop|fashion|electronics|gadget/i, filterCat: "Retail", tag: { label: "Retail", cls: "retail" } },
+    { test: /food|restaurant|bakery|catering|grill|kitchen|cafe/i, filterCat: "Food & Beverages", tag: { label: "Food & Beverages", cls: "food" } }
+  ];
+
+  function deriveTagsAndFilters(categoryText) {
+    const matches = CATEGORY_TAXONOMY.filter((c) => c.test.test(categoryText || ""));
+    if (matches.length === 0) {
+      return { tags: [{ label: categoryText || "Business", cls: "retail" }], filterCats: [] };
+    }
+    return {
+      tags: matches.map((m) => m.tag),
+      filterCats: matches.map((m) => m.filterCat)
+    };
+  }
+
+  function mapBusinessDoc(doc) {
+    const d = doc.data();
+    const { tags, filterCats } = deriveTagsAndFilters(d.category);
+    return {
+      id: doc.id,
+      name: d.name || "Untitled Business",
+      category: d.category || "",
+      location: [d.location && d.location.city, d.location && d.location.state].filter(Boolean).join(", ") || "—",
+      rating: d.ratingAvg || 0,
+      reviews: d.ratingCount || 0,
+      verified: !!d.verified,
+      trustedSeller: !!d.trustedSeller,
+      featuredHome: !!d.featuredHome,
+      image: d.coverUrl || d.logoUrl || "",
+      tags,
+      filterCats
+    };
+  }
+
+  let businessesUnsub = null;
+  function startBusinessListener() {
+    if (businessesUnsub) businessesUnsub();
+    businessesUnsub = db.collection(COLLECTIONS.businesses)
+      .orderBy("createdAt", "desc")
+      .limit(50)
+      .onSnapshot((snap) => {
+        businesses = snap.docs.map(mapBusinessDoc);
+        renderBusinessList();
+      }, (err) => {
+        console.error("Businesses listener error:", err);
+        const msg = err.code === "permission-denied" ? "Can\'t load businesses \u2014 Firestore rules need to be published (see NEILNEST_FIRESTORE_REFERENCE.md)." : "Couldn\'t load businesses. Check your connection.";
+        document.getElementById("business-list").innerHTML = `<div style="padding:24px;text-align:center;color:var(--text-faint);font-size:13px;">${msg}</div>`;
+      });
+  }
+
+  function renderBusinessCard(b) {
+    return `
+      <div class="business-card" data-business-id="${b.id}" role="button" tabindex="0">
+        <div class="business-card__image-wrap">
+          <img src="${b.image}" alt="${b.name}" onerror="this.parentElement.classList.add('img-error')">
+          ${b.verified ? `<span class="verified-pill"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>Verified</span>` : ""}
+          ${b.trustedSeller ? `<span class="verified-pill" style="background:rgba(224,168,60,0.85);"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 4.8 5.3.8-3.85 3.75.9 5.3L12 14.2l-4.75 2.45.9-5.3L4.3 7.6l5.3-.8z"/></svg>Trusted</span>` : ""}
+        </div>
+        <div class="business-card__body">
+          <div>
+            <div class="business-card__name">${b.name}</div>
+            <div class="business-card__category">${b.category}</div>
+            <div class="business-card__meta">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>
+              ${b.location}
+            </div>
+            <div class="business-card__rating">
+              <svg fill="var(--gold)" viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+              ${b.rating.toFixed(1)} (${b.reviews} reviews)
+            </div>
+            <div class="business-card__tags">
+              ${b.tags.map(t => `<span class="tag tag--${t.cls}">${t.label}</span>`).join("")}
+            </div>
+          </div>
+          <button class="bookmark-btn" onclick="event.stopPropagation(); this.classList.toggle('saved'); this.querySelector('svg').setAttribute('fill', this.classList.contains('saved') ? 'currentColor' : 'none')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18l-6-4-6 4V3z"/></svg>
+          </button>
+          <button class="bookmark-btn report-btn" data-report-id="${b.id}" data-report-name="${b.name.replace(/\"/g, '&quot;')}" title="Report">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4M12 17h.01M10.3 3.9L2.7 17a2 2 0 0 0 1.7 3h15.2a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+          </button>
+        </div>
+        <a href="business-profile.html?id=${b.id}" class="business-view-btn" onclick="event.stopPropagation()">View Profile</a>
+      </div>`;
+  }
+
+  let currentCategory = "All";
+  let currentSort = "featured";
+  let searchTerm = "";
+  let showingAll = false;
+
+  function renderBusinessList() {
+    let list = businesses.filter((b) => currentCategory === "All" || b.filterCats.includes(currentCategory));
+    if (searchTerm) {
+      const t = searchTerm.toLowerCase();
+      list = list.filter((b) => b.name.toLowerCase().includes(t) || b.category.toLowerCase().includes(t));
+    }
+    if (currentSort === "featured") list = list.filter((b) => b.featuredHome);
+    if (currentSort === "rating") list = [...list].sort((a, b) => b.rating - a.rating);
+    if (currentSort === "reviews") list = [...list].sort((a, b) => b.reviews - a.reviews);
+    if (currentSort === "verified") list = list.filter((b) => b.verified);
+
+    const visible = list.slice(0, window.innerWidth >= 960 ? 8 : 3);
+    const container = document.getElementById("business-list");
+    const noResults = document.getElementById("no-results");
+
+    container.innerHTML = visible.map(renderBusinessCard).join("");
+    noResults.style.display = visible.length ? "none" : "block";
+    noResults.textContent = currentSort === "featured" && !visible.length
+      ? "Nothing featured yet — check back soon."
+      : "No businesses match this filter yet.";
+    container.querySelectorAll(".business-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        window.location.href = `business-profile.html?id=${card.dataset.businessId}`;
+      });
+    });
+    container.querySelectorAll(".report-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openReportModal({ type: "business", targetId: btn.dataset.reportId, targetName: btn.dataset.reportName, businessId: btn.dataset.reportId });
+      });
+    });
+
+    renderRecentlyAdded();
+    renderPopularCategories();
+    renderRecentlyViewed();
+    // Near You needs the signed-in user's own business location — loaded
+    // once, separately, since it needs its own Firestore read (see below).
+  }
+
+  /* =========================================================================
+     Desktop-only sections. All real data — no fake filler. Each renders
+     into a container that's hidden entirely on mobile via CSS, so none of
+     this touches the mobile layout.
+  ========================================================================= */
+  function dxEmpty(msg) { return `<div class="dx-empty">${msg}</div>`; }
+
+  function renderRecentlyAdded() {
+    const grid = document.getElementById("dxRecentGrid");
+    if (!grid) return;
+    const recent = businesses.slice(0, 8); // already ordered newest-first
+    grid.innerHTML = recent.length ? recent.map(renderBusinessCard).join("") : dxEmpty("No businesses yet.");
+    wireCardClicks(grid);
+  }
+
+  function renderPopularCategories() {
+    const grid = document.getElementById("dxCatGrid");
+    if (!grid) return;
+    const cats = [
+      { label: "Real Estate", icon: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9h4v-6h6v6h4v-9"/>' },
+      { label: "Fashion", icon: '<path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>' },
+      { label: "Hospitality", icon: '<path d="M3 20h18"/><path d="M5 20V9l7-5 7 5v11"/><circle cx="12" cy="13" r="2"/>' },
+      { label: "Beauty", icon: '<circle cx="9" cy="9" r="3"/><path d="M4 20c0-3 2.5-5 5-5s5 2 5 5"/>' },
+      { label: "Retail", icon: '<path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>' },
+      { label: "Food & Catering", icon: '<circle cx="5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="19" cy="12" r="1.4" fill="currentColor"/>' },
+      { label: "Technology", icon: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>' },
+      { label: "Professional Services", icon: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>' }
+    ];
+    grid.innerHTML = cats.map((c) => `
+      <a href="directory.html" class="dx-cat-card">
+        <span class="icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${c.icon}</svg></span>
+        <span>${c.label}</span>
+      </a>`).join("");
+  }
+
+  // Recently Viewed reads from localStorage (nn_recently_viewed — a JSON
+  // array of business IDs, most-recent-first). Nothing writes to this key
+  // yet from business-profile.html; this only reads it, and shows a clean
+  // empty state until that tracking exists.
+  function renderRecentlyViewed() {
+    const grid = document.getElementById("dxViewedGrid");
+    if (!grid) return;
+    let ids = [];
+    try { ids = JSON.parse(localStorage.getItem("nn_recently_viewed") || "[]"); } catch (e) { ids = []; }
+    const viewed = ids.map((id) => businesses.find((b) => b.id === id)).filter(Boolean).slice(0, 8);
+    grid.innerHTML = viewed.length ? viewed.map(renderBusinessCard).join("") : dxEmpty("Businesses you view will show up here.");
+    wireCardClicks(grid);
+  }
+
+  // Businesses Near You — matches the signed-in user's own business state,
+  // since that's the only location signal this app actually has. Loaded
+  // once auth resolves (needs auth.currentUser), independent of the main
+  // business listener.
+  async function renderBusinessesNearYou() {
+    const grid = document.getElementById("dxNearGrid");
+    if (!grid) return;
+    const user = auth.currentUser;
+    if (!user) { grid.innerHTML = dxEmpty("Sign in to see businesses near you."); return; }
+    try {
+      const ownSnap = await db.collection(COLLECTIONS.businesses).where("ownerUid", "==", user.uid).limit(1).get();
+      if (ownSnap.empty) {
+        grid.innerHTML = dxEmpty(`Add your business to see who's near you — <a href="add-business.html">list it free</a>.`);
+        return;
+      }
+      const ownBiz = ownSnap.docs[0];
+      const ownState = ownBiz.data().location && ownBiz.data().location.state;
+      if (!ownState) {
+        grid.innerHTML = dxEmpty("Add a location to your business to see who's near you.");
+        return;
+      }
+      const nearby = businesses.filter((b) => b.id !== ownBiz.id && b.location && b.location.toLowerCase().includes(ownState.toLowerCase())).slice(0, 8);
+      grid.innerHTML = nearby.length ? nearby.map(renderBusinessCard).join("") : dxEmpty(`No other businesses in ${ownState} yet — <a href="directory.html">browse the full directory</a>.`);
+      wireCardClicks(grid);
+    } catch (err) {
+      console.error("renderBusinessesNearYou error:", err);
+      grid.innerHTML = dxEmpty("Couldn't load nearby businesses right now.");
+    }
+  }
+
+  // Shared click-through wiring for the desktop-only grids (same behavior
+  // as the main business-list cards: click anywhere → business profile).
+  function wireCardClicks(grid) {
+    grid.querySelectorAll(".business-card").forEach((card) => {
+      card.addEventListener("click", () => { window.location.href = `business-profile.html?id=${card.dataset.businessId}`; });
+    });
+    grid.querySelectorAll(".report-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openReportModal({ type: "business", targetId: btn.dataset.reportId, targetName: btn.dataset.reportName, businessId: btn.dataset.reportId });
+      });
+    });
+  }
+
+  document.getElementById("dxRecentSeeAll").addEventListener("click", () => { window.location.href = "directory.html"; });
+  document.getElementById("dxNearSeeAll").addEventListener("click", () => { window.location.href = "directory.html"; });
+
+  document.getElementById("seeAllBtn").addEventListener("click", () => {
+    window.location.href = "directory.html";
+  });
+
+  document.getElementById("searchInput").addEventListener("input", (e) => {
+    searchTerm = e.target.value.trim();
+    renderBusinessList();
+  });
+
+  // Re-render when crossing the desktop breakpoint (e.g. resizing a browser
+  // window), so the featured card count adjusts without a full reload.
+  (function () {
+    let wasDesktop = window.innerWidth >= 960;
+    let resizeTimer = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const isDesktop = window.innerWidth >= 960;
+        if (isDesktop !== wasDesktop) { wasDesktop = isDesktop; renderBusinessList(); }
+      }, 150);
+    });
+  })();
+
+  // ---- Category chips: real filtering ----
+  document.querySelectorAll(".category-item").forEach((item) => {
+    item.addEventListener("click", () => {
+      document.querySelectorAll(".category-item").forEach((c) => c.classList.remove("active"));
+      item.classList.add("active");
+      currentCategory = item.dataset.cat;
+      showingAll = false;
+      renderBusinessList();
+    });
+  });
+
+  // ---- Generic dropdown toggle helper (bell / avatar / filter panels) ----
+  function wireDropdown(btnId, panelId) {
+    const btn = document.getElementById(btnId);
+    const panel = document.getElementById(panelId);
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const willOpen = !panel.classList.contains("open");
+      document.querySelectorAll(".dropdown-panel").forEach((p) => p.classList.remove("open"));
+      if (willOpen) panel.classList.add("open");
+    });
+  }
+  wireDropdown("bellBtn", "notifPanel");
+  wireDropdown("avatarBtn", "profileMenu");
+  wireDropdown("filterBtn", "filterPanel");
+
+  // ---- Log out ----
+  document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+    e.preventDefault();
+    try { await auth.signOut(); } catch (err) { console.error("Sign out error:", err); }
+    window.location.href = "signin.html";
+  });
+
+  document.addEventListener("click", () => {
+    document.querySelectorAll(".dropdown-panel").forEach((p) => p.classList.remove("open"));
+  });
+  document.querySelectorAll(".dropdown-panel").forEach((p) => p.addEventListener("click", (e) => e.stopPropagation()));
+
+  // ---- Sort/filter panel options ----
+  document.querySelectorAll(".sort-option").forEach((opt) => {
+    opt.addEventListener("click", () => {
+      document.querySelectorAll(".sort-option").forEach((o) => o.classList.remove("selected"));
+      opt.classList.add("selected");
+      currentSort = opt.dataset.sort;
+      document.getElementById("filterPanel").classList.remove("open");
+      renderBusinessList();
+    });
+  });
+
+  // firebase-init.js is included further down this file, so wait for the
+  // document (and therefore that script) to finish loading before touching db.
+  document.addEventListener("DOMContentLoaded", startBusinessListener);
+
+  // Businesses Near You needs auth.currentUser, which may not be resolved
+  // yet on first paint — wait for the first auth state change, then load it.
+  // (Also waits for DOMContentLoaded, same reason as above: auth doesn't
+  // exist yet at this point in the file — firebase-init.js loads later.)
+  document.addEventListener("DOMContentLoaded", () => {
+    let done = false;
+    auth.onAuthStateChanged(() => {
+      if (done) return;
+      done = true;
+      renderBusinessesNearYou();
+    });
+  });
+
+  // ---- Hero carousel: autoplay + swipe + dot-tap, all functional ----
+  (function () {
+    const track = document.getElementById("heroTrack");
+    const dots = Array.from(document.querySelectorAll("#heroDots button"));
+    const slideCount = dots.length;
+    let index = 0;
+    let timer = null;
+
+    function goTo(i) {
+      index = (i + slideCount) % slideCount;
+      track.style.transform = `translateX(-${index * 100}%)`;
+      dots.forEach((d, di) => d.classList.toggle("active", di === index));
+    }
+
+    function startAutoplay() {
+      clearInterval(timer);
+      timer = setInterval(() => goTo(index + 1), 4000);
+    }
+
+    dots.forEach((dot) => {
+      dot.addEventListener("click", () => {
+        goTo(Number(dot.dataset.i));
+        startAutoplay();
+      });
+    });
+
+    // Swipe support
+    let startX = 0, deltaX = 0, dragging = false;
+    const carousel = document.getElementById("heroCarousel");
+    carousel.addEventListener("touchstart", (e) => {
+      dragging = true;
+      startX = e.touches[0].clientX;
+      clearInterval(timer);
+      track.style.transition = "none";
+    }, { passive: true });
+    carousel.addEventListener("touchmove", (e) => {
+      if (!dragging) return;
+      deltaX = e.touches[0].clientX - startX;
+      track.style.transform = `translateX(calc(-${index * 100}% + ${deltaX}px))`;
+    }, { passive: true });
+    carousel.addEventListener("touchend", () => {
+      dragging = false;
+      track.style.transition = "transform 0.45s cubic-bezier(.4,0,.2,1)";
+      if (Math.abs(deltaX) > 50) {
+        goTo(index + (deltaX < 0 ? 1 : -1));
+      } else {
+        goTo(index);
+      }
+      deltaX = 0;
+      startAutoplay();
+    });
+
+    goTo(0);
+    startAutoplay();
+  })();
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="auth-guard.js"></script>
+<script src="trustsafety-core.js"></script>
+<script src="notifications.js"></script>
+</body>
+</html>

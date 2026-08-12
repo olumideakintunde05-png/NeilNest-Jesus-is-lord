@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Analytics — NeilNest</title>
+<script src="theme.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #000; --surface-0: #0a0a0a; --surface-1: #101010; --surface-2: #141414;
+    --surface-3: #1a1a1a; --surface-4: #1e1e1e;
+    --text-primary: #fff; --text-secondary: #a8a8a8; --text-faint: #7a7a7a; --text-dim: #6e6e6e;
+    --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.14);
+    --gold: #e0a83c; --gold-deep: #d99a2b; --gold-text-on: #1a1200;
+    --success: #37c65f; --danger: #e14b4b;
+  }
+  [data-theme="light"] {
+    --bg: #F7F7F9; --surface-0: #FFFFFF; --surface-1: #FFFFFF; --surface-2: #FFFFFF;
+    --surface-3: #F0EFF3; --surface-4: #E8E7EC;
+    --text-primary: #1A1A1E; --text-secondary: #46424F; --text-faint: #6B6875; --text-dim: #8A8694;
+    --border: #E8E7EC; --border-strong: #DAD8E0;
+    --gold: #C7862A; --gold-deep: #B8791F; --gold-text-on: #1a1200;
+    --success: #157F41; --danger: #D14343;
+  }
+  html, body { background: var(--bg); height: 100%; }
+  body { font-family: -apple-system, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif; color: var(--text-primary); font-size: 14px; line-height: 1.4; transition: background 0.25s ease, color 0.25s ease; }
+  a { text-decoration: none; color: inherit; touch-action: manipulation; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; touch-action: manipulation; }
+  a:active, button:active { opacity: 0.72; }
+
+  .app-shell { max-width: 390px; margin: 0 auto; min-height: 100dvh; padding: 20px 20px 50px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+
+  .top-row { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+  .back-btn { width: 38px; height: 38px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .top-title { font-size: 20px; font-weight: 800; }
+  .top-subtitle { color: var(--text-secondary); font-size: 13.5px; margin: 4px 0 22px 50px; }
+
+  .section-heading { font-size: 15px; font-weight: 800; margin: 26px 0 12px; }
+
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .summary-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px; padding: 15px; }
+  .summary-card .ic { width: 30px; height: 30px; border-radius: 9px; background: rgba(224,168,60,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+  .summary-card .ic svg { width: 15px; height: 15px; color: var(--gold); }
+  .summary-card .num { font-size: 22px; font-weight: 800; }
+  .summary-card .lbl { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
+
+  .chart-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px; padding: 18px 16px 14px; }
+  .chart-bars { display: flex; align-items: flex-end; gap: 8px; height: 120px; }
+  .chart-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; }
+  .chart-bar { width: 100%; max-width: 26px; border-radius: 6px 6px 2px 2px; background: linear-gradient(180deg, #f0bd5a, var(--gold-deep)); min-height: 3px; }
+  .chart-bar-label { font-size: 9.5px; color: var(--text-dim); }
+  .chart-bar-value { font-size: 9.5px; color: var(--text-secondary); font-weight: 700; }
+
+  .product-row { display: flex; align-items: center; gap: 12px; background: var(--surface-1); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 11px 13px; margin-bottom: 9px; }
+  .product-row img, .product-row .ph { width: 42px; height: 42px; border-radius: 10px; object-fit: cover; background: var(--surface-4); flex-shrink: 0; }
+  .product-row .p-name { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+  .product-row .p-views { font-size: 11.5px; color: var(--text-secondary); }
+  .product-row .p-count { margin-left: auto; text-align: right; font-size: 13px; font-weight: 800; color: var(--gold); }
+
+  .empty-note { text-align: center; color: var(--text-dim); font-size: 12.5px; padding: 20px 0; }
+
+  .locked-wrap { text-align: center; padding: 60px 20px; }
+  .locked-icon { width: 60px; height: 60px; border-radius: 50%; background: rgba(224,168,60,0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
+  .locked-icon svg { width: 26px; height: 26px; color: var(--gold); }
+  .locked-title { font-size: 17px; font-weight: 800; margin-bottom: 8px; }
+  .locked-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 22px; }
+  .locked-btn { display: inline-block; padding: 13px 26px; border-radius: 14px; background: linear-gradient(135deg, #f0bd5a, var(--gold-deep)); color: var(--gold-text-on); font-weight: 800; font-size: 14px; }
+
+  .skel { background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 37%, var(--surface-2) 63%); background-size: 400% 100%; animation: skel 1.4s ease infinite; border-radius: 12px; height: 90px; }
+  @keyframes skel { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+
+  #toast-host { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 8px; width: calc(100% - 40px); max-width: 350px; }
+  .toast { display: flex; align-items: center; gap: 10px; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 14px; padding: 13px 16px; font-size: 13px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+</style>
+</head>
+<body>
+<div class="app-shell" id="appShell">
+  <div class="top-row">
+    <button class="back-btn" id="backBtn" aria-label="Back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="top-title">Analytics</div>
+  </div>
+  <div class="top-subtitle">Track how customers find and engage with your business.</div>
+
+  <div id="lockedState" style="display:none;">
+    <div class="locked-wrap">
+      <div class="locked-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V8a5 5 0 0 1 10 0v3"/></svg></div>
+      <div class="locked-title">Analytics is a Pro feature</div>
+      <div class="locked-desc">Upgrade to Pro or Business to see views, contact clicks, messages, and your top products.</div>
+      <a href="upgrade.html" class="locked-btn">Upgrade Now</a>
+    </div>
+  </div>
+
+  <div id="dashboardState" style="display:none;">
+    <div class="section-heading">Overview</div>
+    <div class="summary-grid" id="summaryGrid"></div>
+
+    <div class="section-heading">Views — Last 7 Days</div>
+    <div class="chart-card"><div class="chart-bars" id="chartBars"></div></div>
+
+    <div class="section-heading">Top Products</div>
+    <div id="topProductsWrap"><div class="empty-note">No product views yet.</div></div>
+  </div>
+
+  <div id="toast-host"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="auth-guard.js"></script>
+<script src="billing.js"></script>
+<script src="analytics.js"></script>
+</body>
+</html>

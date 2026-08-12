@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#050505">
+<title>NeilNest — Nigeria's Trusted Business Directory</title>
+<meta name="description" content="Discover verified Nigerian businesses, connect with the right people, and grow your network — all in one place. List your business free.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<script src="theme.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; }
+
+  /* ---------- Theme tokens ----------
+     Dark is the default (matches the brand's native identity). The
+     [data-theme="light"] block below is a deliberately separate palette,
+     not an inversion — see the doc's own "do not simply invert" rule. */
+  :root {
+    --bg: #050505;
+    --surface-1: #0d0b12;        /* cards: feat-card, newsletter input */
+    --surface-2: #171420;        /* elevated panels: dropdowns */
+    --text-primary: #f2f2f2;
+    --text-secondary: #cfcfcf;
+    --text-muted: #a8a2b3;
+    --text-faint: #857e91;
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.14);
+    --gold: #e0a83c;
+    --gold-text-on: #1a1200;
+    --purple: #6b4fd1;
+    --purple-soft: #c9a4ff;
+    --purple-wash: rgba(154,109,255,0.12);
+    --purple-wash-border: rgba(154,109,255,0.28);
+    --topnav-bg: rgba(5,5,5,0.9);
+  }
+  [data-theme="light"] {
+    --bg: #F7F7F9;
+    --surface-1: #FFFFFF;
+    --surface-2: #FFFFFF;
+    --text-primary: #1A1A1E;
+    --text-secondary: #46424F;
+    --text-muted: #6B6875;
+    --text-faint: #8A8694;
+    --border: #E8E7EC;
+    --border-strong: #DAD8E0;
+    --gold: #C7862A;             /* darkened slightly for AA contrast on white */
+    --gold-text-on: #1a1200;
+    --purple: #6b4fd1;
+    --purple-soft: #6E4FD9;      /* darkened from the near-white lilac so it reads on white */
+    --purple-wash: rgba(107,79,209,0.08);
+    --purple-wash-border: rgba(107,79,209,0.22);
+    --topnav-bg: rgba(255,255,255,0.85);
+  }
+
+  body {
+    background: var(--bg); color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
+    transition: background 0.25s ease, color 0.25s ease;
+  }
+  .display { font-family: "Fraunces", Georgia, serif; }
+  a { color: inherit; }
+  img { max-width: 100%; display: block; }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* =========================================================================
+     Splash / auth gate — always the dark brand palette regardless of the
+     user's theme choice (a splash is a brand moment, not a themed screen —
+     same reasoning apps like this typically use).
+
+     Concept: the earth/city-lights image IS the network. A handful of its
+     lit points get small "signal" nodes; thin lines draw between them as
+     each real loading step completes. The tagline "Connect · Grow · Thrive"
+     lights up one word per step — so what you're watching is literally the
+     three things actually happening (auth check → data fetch → ready), not
+     a decorative timer.
+  ========================================================================= */
+  #authGate {
+    position: fixed; inset: 0; z-index: 999; background: #050505;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    overflow: hidden; transition: opacity 0.5s ease;
+  }
+  #authGate.hidden { opacity: 0; pointer-events: none; }
+
+  #authGate .sp-earth-wrap {
+    position: absolute; bottom: -34%; left: 50%; width: 175%; max-width: 820px;
+    transform: translateX(-50%); z-index: 1; opacity: 0;
+    animation: spEarthIn 1.8s cubic-bezier(0.16,1,0.3,1) 0.1s forwards;
+  }
+  @keyframes spEarthIn {
+    0% { opacity: 0; transform: translateX(-50%) translateY(4%) scale(1.03); }
+    100% { opacity: 0.85; transform: translateX(-50%) translateY(0) scale(1); }
+  }
+  #authGate .sp-earth-wrap img { width: 100%; display: block; filter: saturate(1.08) brightness(0.88); }
+
+  #authGate svg.sp-nodes { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; overflow: visible; }
+  #authGate .sp-nodes line {
+    stroke: url(#spLineGrad); stroke-width: 1; opacity: 0;
+    stroke-dasharray: 40; stroke-dashoffset: 40;
+    transition: opacity 0.5s ease, stroke-dashoffset 0.8s ease;
+  }
+  #authGate .sp-nodes circle {
+    fill: #e0a83c; opacity: 0; transform-origin: center;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  #authGate.step-1 .sp-nodes .n1, #authGate.step-1 .sp-nodes .n2,
+  #authGate.step-2 .sp-nodes .n1, #authGate.step-2 .sp-nodes .n2, #authGate.step-2 .sp-nodes .n3,
+  #authGate.step-3 .sp-nodes circle { opacity: 1; transform: scale(1); }
+  #authGate.step-2 .sp-nodes .l1, #authGate.step-3 .sp-nodes .l1,
+  #authGate.step-3 .sp-nodes .l2 { opacity: 0.85; stroke-dashoffset: 0; }
+
+  #authGate .sp-vignette {
+    position: absolute; inset: 0; z-index: 3; pointer-events: none;
+    background:
+      radial-gradient(ellipse 130% 75% at 50% 100%, rgba(5,5,5,0) 0%, rgba(5,5,5,0.65) 52%, #050505 76%),
+      linear-gradient(to bottom, #050505 0%, rgba(5,5,5,0) 24%, rgba(5,5,5,0) 68%, #050505 100%);
+  }
+
+  #authGate .sp-content {
+    position: relative; z-index: 4; display: flex; flex-direction: column; align-items: center;
+    opacity: 0; transform: translateY(12px) scale(0.97);
+    animation: spContentIn 0.8s cubic-bezier(0.16,1,0.3,1) 0.3s forwards;
+  }
+  @keyframes spContentIn { to { opacity: 1; transform: translateY(0) scale(1); } }
+
+  #authGate .sp-ring-wrap { position: relative; width: 104px; height: 104px; margin-bottom: 14px; }
+  #authGate .sp-ring { position: absolute; inset: 0; transform: rotate(-90deg); }
+  #authGate .sp-ring circle { fill: none; stroke-width: 2.5; }
+  #authGate .sp-ring .track { stroke: rgba(255,255,255,0.08); }
+  #authGate .sp-ring .fill {
+    stroke: url(#spRingGrad); stroke-linecap: round;
+    stroke-dasharray: 289.03; stroke-dashoffset: 289.03;
+    transition: stroke-dashoffset 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+  #authGate .mark { position: absolute; inset: 0; margin: auto; width: 56px; height: auto; }
+
+  #authGate .sp-wordmark { margin-top: 2px; font-size: 25px; font-weight: 800; letter-spacing: -0.02em; color: #f2f2f2; display: flex; }
+  #authGate .sp-wordmark .accent { color: #e0a83c; }
+
+  #authGate .sp-tagline { margin-top: 9px; display: flex; gap: 7px; font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+  #authGate .sp-tagline span { color: #3a3742; transition: color 0.45s ease; }
+  #authGate .sp-tagline .sep { color: #2a2830; }
+  #authGate.step-1 .sp-tagline .w1 { color: #e0a83c; }
+  #authGate.step-2 .sp-tagline .w1 { color: #f2f2f2; }
+  #authGate.step-2 .sp-tagline .w2 { color: #e0a83c; }
+  #authGate.step-3 .sp-tagline .w1, #authGate.step-3 .sp-tagline .w2 { color: #f2f2f2; }
+  #authGate.step-3 .sp-tagline .w3 { color: #e0a83c; }
+
+  #authGate .sp-status {
+    position: absolute; bottom: max(46px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 4;
+    font-size: 10.5px; letter-spacing: 0.08em; color: #6e6779; font-weight: 600; text-transform: uppercase;
+    opacity: 0; animation: spFadeUp 0.6s ease-out 0.9s forwards;
+  }
+  @keyframes spFadeUp { from { opacity: 0; transform: translate(-50%, 6px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    #authGate .sp-earth-wrap, #authGate .sp-content, #authGate .sp-status { animation: none !important; opacity: 1 !important; transform: translateX(-50%) !important; }
+    #authGate .sp-content { transform: none !important; }
+  }
+  #page { opacity: 0; }
+  #page.ready { opacity: 1; transition: opacity 0.4s ease; }
+
+  /* ---------- Top nav ---------- */
+  .topnav { position: sticky; top: 0; z-index: 40; background: var(--topnav-bg, rgba(5,5,5,0.9)); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+  .topnav__inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; max-width: 1320px; margin: 0 auto; gap: 20px; }
+  .topnav__brand { display: flex; align-items: center; gap: 9px; flex-shrink: 0; }
+  .topnav__brand img { width: 30px; height: 30px; }
+  .topnav__brand-text span { display: block; font-size: 16px; font-weight: 700; line-height: 1.1; }
+  .topnav__brand-text small { display: block; font-size: 9.5px; color: var(--gold); font-weight: 600; }
+  .topnav__links { display: none; align-items: center; gap: 28px; font-size: 13.5px; color: var(--text-secondary); }
+  .topnav__links a { text-decoration: none; }
+  .topnav__links a:hover { color: var(--gold); }
+  .nav-dropdown { position: relative; }
+  .nav-dropdown__trigger { display: flex; align-items: center; gap: 4px; background: none; border: none; color: var(--text-secondary); font-size: 13.5px; }
+  .nav-dropdown__trigger:hover { color: var(--gold); }
+  .nav-dropdown__panel {
+    position: absolute; top: calc(100% + 14px); left: 50%; transform: translateX(-50%);
+    background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 14px;
+    padding: 10px; width: 200px; display: none; grid-template-columns: 1fr 1fr; gap: 2px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  .nav-dropdown:hover .nav-dropdown__panel { display: grid; }
+  .nav-dropdown__panel a { padding: 8px 10px; border-radius: 8px; font-size: 12.5px; text-decoration: none; color: var(--text-secondary); }
+  .nav-dropdown__panel a:hover { background: var(--border); color: var(--gold); }
+  .topnav__actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .btn-ghost { padding: 9px 16px; border-radius: 10px; font-size: 13.5px; font-weight: 600; color: var(--text-secondary); text-decoration: none; }
+  .btn-gold-sm { padding: 9px 18px; border-radius: 10px; background: var(--gold); color: var(--gold-text-on); font-size: 13.5px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+
+  /* ---------- Hero ---------- */
+  .hero { position: relative; padding: 60px 20px 70px; background: radial-gradient(120% 90% at 15% 0%, #1a1030 0%, #0b0714 42%, #050505 78%); overflow: hidden; }
+  /* Background image — same technique as signin.html's .earth-bg (absolute,
+     mask-image fade), just mirrored: visible on the right, fading toward
+     the left so it sits behind the headline instead of fighting it. */
+  .hero-bg { position: absolute; top: 0; right: 0; width: 62%; height: 100%; z-index: 0; overflow: hidden; pointer-events: none; }
+  .hero-bg img {
+    width: 100%; height: 100%; object-fit: cover; opacity: 0.55;
+    -webkit-mask-image: linear-gradient(270deg, #000 40%, transparent 92%);
+            mask-image: linear-gradient(270deg, #000 40%, transparent 92%);
+  }
+  .hero__inner { position: relative; z-index: 1; max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 50px; align-items: center; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--purple-soft); margin-bottom: 20px; }
+  .eyebrow::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+  .hero h1 { font-size: clamp(34px, 5.4vw, 54px); font-weight: 600; line-height: 1.08; letter-spacing: -0.01em; margin-bottom: 18px; }
+  .hero h1 .gold-line { display: block; color: var(--gold); }
+  .hero p.sub { font-size: 15.5px; line-height: 1.65; color: var(--text-muted); max-width: 460px; margin-bottom: 30px; }
+  .hero__ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 26px; }
+  .btn-gold { padding: 15px 24px; border-radius: 13px; background: var(--gold); color: var(--gold-text-on); font-size: 14px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 10px 30px rgba(224,168,60,0.18); border: none; }
+  .btn-outline { padding: 15px 24px; border-radius: 13px; background: transparent; border: 1px solid var(--border-strong); color: var(--text-primary); font-size: 14px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+  .trust-row { display: flex; flex-wrap: wrap; gap: 20px; }
+  .trust-row__item { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--text-muted); }
+  .trust-row__item svg { color: var(--gold); flex-shrink: 0; }
+
+  /* Phone mockup illustration */
+  .mockup { position: relative; height: 380px; display: none; }
+  .mockup__glow { position: absolute; inset: -40px; background: radial-gradient(circle at 60% 40%, var(--purple-wash-border), transparent 65%); filter: blur(20px); }
+  .phone { position: absolute; width: 220px; border-radius: 26px; background: #0c0a12; border: 1px solid var(--border-strong); box-shadow: 0 40px 80px rgba(0,0,0,0.6); padding: 14px; }
+  .phone--back { top: 10px; left: 130px; height: 360px; transform: rotate(6deg); z-index: 1; }
+  .phone--front { top: 40px; left: 0; height: 380px; transform: rotate(-5deg); z-index: 2; }
+  .phone__head { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; font-size: 10px; font-weight: 700; color: var(--text-secondary); }
+  .phone__head img { width: 14px; height: 14px; }
+  .phone__title { font-size: 13px; font-weight: 700; line-height: 1.3; margin-bottom: 10px; }
+  .phone__title em { font-style: normal; color: var(--gold); }
+  .phone__search { background: var(--surface-2); border-radius: 9px; padding: 8px 10px; font-size: 9.5px; color: var(--text-faint); margin-bottom: 12px; }
+  .phone__cats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+  .phone__cat { background: var(--surface-2); border-radius: 8px; padding: 8px 4px; text-align: center; font-size: 8px; color: var(--text-muted); }
+  .phone__cat .dot { width: 16px; height: 16px; border-radius: 50%; background: rgba(224,168,60,0.2); margin: 0 auto 4px; }
+  .phone__card { background: var(--surface-2); border-radius: 10px; padding: 8px; display: flex; gap: 8px; align-items: center; }
+  .phone__card .thumb { width: 34px; height: 34px; border-radius: 7px; background: linear-gradient(135deg, var(--purple), var(--gold)); flex-shrink: 0; }
+  .phone__card .txt { font-size: 8.5px; }
+  .phone__card .txt b { display: block; font-size: 9.5px; margin-bottom: 2px; }
+  .phone__img { width: 100%; height: 90px; border-radius: 9px; background: linear-gradient(135deg, #2a2140, var(--surface-2)); margin-bottom: 10px; }
+  .phone__rating { display: flex; align-items: center; gap: 4px; font-size: 9px; color: var(--gold); margin-top: 8px; }
+
+  /* ---------- Sections ---------- */
+  section { padding: 60px 20px; }
+  .shell { max-width: 1320px; margin: 0 auto; }
+  .section-head { max-width: 620px; margin-bottom: 32px; }
+  .section-head .eyebrow { color: var(--gold); }
+  .section-head .eyebrow::before { background: var(--purple-soft); }
+  .section-head h2 { font-size: clamp(24px, 3vw, 32px); font-weight: 600; line-height: 1.15; margin-bottom: 10px; }
+  .section-head p { font-size: 13.5px; line-height: 1.7; color: var(--text-muted); }
+
+  /* Featured */
+  .featured-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 28px; }
+  .link-arrow { font-size: 13px; font-weight: 700; color: var(--gold); text-decoration: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; }
+  #featuredWrap {
+    display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 4px; margin: 0 -20px; padding-left: 20px; padding-right: 20px;
+  }
+  #featuredWrap::-webkit-scrollbar { display: none; }
+  .feat-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px; padding: 12px; text-decoration: none; color: inherit; display: flex; flex-direction: column; flex: 0 0 220px; scroll-snap-align: start; }
+  @media (min-width: 860px) {
+    #featuredWrap { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); overflow-x: visible; margin: 0; padding: 0; }
+    .feat-card { flex: none; }
+  }
+  .feat-card__img { width: 100%; height: 110px; border-radius: 11px; background: var(--surface-2); object-fit: cover; margin-bottom: 12px; }
+  .feat-card__name { font-size: 14px; font-weight: 700; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .feat-card__cat { font-size: 12px; color: var(--gold); margin-bottom: 3px; }
+  .feat-card__loc { font-size: 11.5px; color: var(--text-faint); margin-bottom: 10px; }
+  .feat-card__rating { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; }
+  .feat-card__rating svg { color: var(--gold); }
+  .feat-card__btn { margin-top: auto; text-align: center; padding: 9px; border-radius: 9px; border: 1px solid var(--border-strong); font-size: 12.5px; font-weight: 600; }
+  .feat-empty { grid-column: 1 / -1; flex: 1 1 100%; text-align: center; padding: 40px 20px; color: var(--text-faint); font-size: 13.5px; }
+  .feat-empty a { color: var(--gold); text-decoration: none; font-weight: 700; }
+
+  /* CTA banner */
+  .cta-banner {
+    background: radial-gradient(120% 160% at 30% 30%, #1a1030 0%, #0b0714 55%, var(--surface-1) 100%);
+    border: 1px solid rgba(224,168,60,0.2); border-radius: 22px; padding: 36px;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 26px; justify-content: space-between;
+  }
+  .cta-banner__left { display: flex; align-items: center; gap: 20px; flex: 1; min-width: 240px; }
+  .cta-banner__icon { width: 58px; height: 58px; border-radius: 50%; background: rgba(224,168,60,0.1); border: 1px solid rgba(224,168,60,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--gold); }
+  .cta-banner h2 { font-size: clamp(20px, 2.6vw, 27px); font-weight: 600; margin-bottom: 8px; }
+  .cta-banner h2 .gold { color: var(--gold); }
+  .cta-banner p { font-size: 13px; color: var(--text-muted); max-width: 340px; }
+  .cta-banner__btns { display: flex; flex-direction: column; gap: 10px; min-width: 200px; }
+  .cta-banner__btns .btn-gold, .cta-banner__btns .btn-outline { justify-content: center; }
+
+  /* Why choose */
+  .why-head { text-align: center; margin-bottom: 40px; }
+  .why-head h2 { font-size: clamp(22px, 2.8vw, 28px); font-weight: 600; }
+  .why-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 26px; }
+  .why-item { text-align: left; }
+  .why-item__icon { width: 46px; height: 46px; border-radius: 12px; background: var(--purple-wash); border: 1px solid var(--purple-wash-border); display: flex; align-items: center; justify-content: center; color: var(--purple-soft); margin-bottom: 14px; }
+  .why-item h4 { font-size: 14.5px; font-weight: 700; margin-bottom: 6px; }
+  .why-item p { font-size: 12.5px; line-height: 1.6; color: var(--text-muted); }
+
+  /* How it works */
+  .how-head { text-align: center; margin-bottom: 40px; }
+  .how-head h2 { font-size: clamp(22px, 2.8vw, 28px); font-weight: 600; }
+  .how-steps { display: flex; flex-direction: column; gap: 34px; max-width: 720px; margin: 0 auto; }
+  .how-step { display: flex; gap: 16px; align-items: flex-start; }
+  .how-step__num { width: 40px; height: 40px; border-radius: 50%; background: var(--purple-wash); border: 1px solid var(--purple-wash-border); color: var(--purple-soft); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; }
+  .how-step h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .how-step p { font-size: 13px; line-height: 1.6; color: var(--text-muted); }
+
+  /* Footer */
+  footer { border-top: 1px solid var(--border); padding: 50px 20px 30px; }
+  .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr 1.2fr; gap: 28px; margin-bottom: 34px; }
+  .footer-brand { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+  .footer-brand img { width: 26px; height: 26px; }
+  .footer-brand span { font-size: 15px; font-weight: 700; display: block; }
+  .footer-brand small { font-size: 10.5px; color: var(--gold); font-weight: 600; }
+  .footer-desc { font-size: 12.5px; line-height: 1.6; color: var(--text-faint); margin-bottom: 16px; max-width: 240px; }
+  .footer-socials { display: flex; gap: 10px; }
+  .footer-socials a { width: 32px; height: 32px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); text-decoration: none; }
+  .footer-col h5 { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gold); margin-bottom: 14px; }
+  .footer-col a { display: block; font-size: 13px; color: var(--text-secondary); text-decoration: none; margin-bottom: 11px; }
+  .footer-col a:hover { color: var(--gold); }
+  .newsletter h5 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+  .newsletter p { font-size: 12px; color: var(--text-faint); margin-bottom: 12px; line-height: 1.5; }
+  .newsletter form { display: flex; gap: 0; border: 1px solid var(--border-strong); border-radius: 10px; overflow: hidden; }
+  .newsletter input { flex: 1; min-width: 0; background: var(--surface-1); border: none; padding: 11px 12px; font-size: 12.5px; color: var(--text-primary); outline: none; }
+  .newsletter button { background: var(--gold); border: none; width: 42px; display: flex; align-items: center; justify-content: center; color: var(--gold-text-on); flex-shrink: 0; }
+  .newsletter .note { font-size: 11px; margin-top: 8px; color: var(--text-faint); min-height: 14px; }
+  .footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding-top: 22px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-faint); }
+
+  /* ---------- Light-mode overrides for hand-tuned decorative sections ----------
+     These aren't token-driven because they're bespoke gradients/illustrations,
+     not flat surfaces — a straight color-swap would look muddy. Redesigned
+     per-section instead, per the "don't just invert" rule. */
+  [data-theme="light"] .hero {
+    background: radial-gradient(120% 90% at 15% 0%, #EDE7FB 0%, #F7F7F9 45%, #F7F7F9 78%);
+  }
+  [data-theme="light"] .hero-bg img { opacity: 0.9; }
+  [data-theme="light"] .eyebrow::before { background: var(--gold); }
+  [data-theme="light"] .cta-banner {
+    background: radial-gradient(120% 160% at 30% 30%, #EDE7FB 0%, #F7F7F9 55%, #FFFFFF 100%);
+    border-color: rgba(199,134,42,0.3);
+  }
+  [data-theme="light"] .why-item__icon,
+  [data-theme="light"] .how-step__num { background: var(--purple-wash); border-color: var(--purple-wash-border); }
+  [data-theme="light"] .mockup { filter: drop-shadow(0 25px 50px rgba(30,20,60,0.14)); }
+  [data-theme="light"] .footer-socials a { background: var(--surface-1); }
+
+  @media (min-width: 860px) {
+    .topnav__links { display: flex; }
+    .why-grid { grid-template-columns: repeat(4, 1fr); }
+    .how-steps { flex-direction: row; align-items: flex-start; max-width: none; }
+    .how-step { flex-direction: column; text-align: center; align-items: center; flex: 1; position: relative; }
+    .how-step:not(:last-child)::after {
+      content: ""; position: absolute; top: 20px; left: calc(50% + 40px); width: calc(100% - 40px);
+      height: 1px; background: repeating-linear-gradient(90deg, var(--purple-wash-border) 0 6px, transparent 6px 12px);
+    }
+  }
+  /* The phone mockup needs real room (~1300px+) or it squeezes into the
+     headline text at in-between widths. Kept separate from the 860px
+     breakpoint above on purpose — below this, hero stays single-column
+     with no mockup, which looks clean at any width. */
+  @media (min-width: 1180px) {
+    .hero__inner { grid-template-columns: 1fr 1fr; }
+    .mockup { display: block; }
+  }
+  @media (max-width: 700px) {
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .cta-banner { flex-direction: column; align-items: flex-start; }
+    .cta-banner__btns { width: 100%; }
+    .cta-banner__btns a { width: 100%; }
+  }
+  @media (max-width: 460px) {
+    .footer-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="authGate">
+  <div class="sp-earth-wrap">
+    <img src="earth-glow.jpg" alt="" onerror="this.style.display='none'">
+  </div>
+
+  <!-- Signal nodes over the city-lights image: each one lights up and each
+       line draws in as a real loading step completes (see revealPage()/JS
+       below — .step-1 / .step-2 / .step-3 classes drive all of this). -->
+  <svg class="sp-nodes" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="spLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#6b4fd1"/><stop offset="100%" stop-color="#e0a83c"/>
+      </linearGradient>
+    </defs>
+    <line class="l1" x1="34" y1="63" x2="52" y2="58"/>
+    <line class="l2" x1="52" y1="58" x2="69" y2="64"/>
+    <circle class="n1" cx="34" cy="63" r="1.1"/>
+    <circle class="n2" cx="52" cy="58" r="1.1"/>
+    <circle class="n3" cx="69" cy="64" r="1.1"/>
+  </svg>
+
+  <div class="sp-vignette"></div>
+
+  <div class="sp-content">
+    <div class="sp-ring-wrap">
+      <svg class="sp-ring" width="104" height="104" viewBox="0 0 104 104" aria-hidden="true">
+        <defs>
+          <linearGradient id="spRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#6b4fd1"/><stop offset="100%" stop-color="#e0a83c"/>
+          </linearGradient>
+        </defs>
+        <circle class="track" cx="52" cy="52" r="46"/>
+        <circle class="fill" id="spRingFill" cx="52" cy="52" r="46"/>
+      </svg>
+      <img class="mark" src="logo.png" alt="NeilNest" onerror="this.style.display='none'">
+    </div>
+    <div class="sp-wordmark">Neil<span class="accent">Nest</span></div>
+    <div class="sp-tagline">
+      <span class="w1">Connect</span><span class="sep">·</span>
+      <span class="w2">Grow</span><span class="sep">·</span>
+      <span class="w3">Thrive</span>
+    </div>
+  </div>
+
+  <div class="sp-status" id="spStatus">Starting up</div>
+</div>
+
+<div id="page">
+
+  <nav class="topnav">
+    <div class="topnav__inner">
+      <div class="topnav__brand">
+        <img src="logo.png" alt="" onerror="this.style.display='none'">
+        <div class="topnav__brand-text"><span>NeilNest</span><small>Connect. Grow. Thrive.</small></div>
+      </div>
+      <div class="topnav__links">
+        <a href="directory.html">Directory</a>
+        <a href="signup.html">List a Business</a>
+        <a href="upgrade.html">Pricing</a>
+        <a href="#how-it-works">How It Works</a>
+        <div class="nav-dropdown">
+          <button class="nav-dropdown__trigger">Categories<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg></button>
+          <div class="nav-dropdown__panel" id="categoryDropdown"></div>
+        </div>
+      </div>
+      <div class="topnav__actions">
+        <a href="signin.html" class="btn-ghost">Sign In</a>
+        <a href="signup.html" class="btn-gold-sm">Sign Up Free</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-bg"><img src="background1.png" alt="" onerror="this.style.opacity=0"></div>
+    <div class="hero__inner">
+      <div>
+        <div class="eyebrow">Nigeria's Trusted Business Directory</div>
+        <h1 class="display">Find the businesses<span class="gold-line">you need.</span></h1>
+        <p class="sub">Discover verified businesses, connect with the right people, and grow your network — all in one place.</p>
+        <div class="hero__ctas">
+          <a href="directory.html" class="btn-gold">Browse Businesses<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a href="signup.html" class="btn-outline">List Your Business — Free</a>
+        </div>
+        <div class="trust-row">
+          <div class="trust-row__item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4z"/></svg>Verified Businesses</div>
+          <div class="trust-row__item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="8" r="3.2"/><path d="M2 20c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5"/><path d="M17 8.2c1.3.3 2.2 1.4 2.2 2.8 0 1.4-1 2.5-2.2 2.8M21 20c0-2.6-1.8-4.4-4-5.2"/></svg>Trusted by Nigerians</div>
+          <div class="trust-row__item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>Fast & Easy</div>
+        </div>
+      </div>
+
+      <div class="mockup">
+        <div class="mockup__glow"></div>
+        <div class="phone phone--back">
+          <div class="phone__head"><img src="logo.png" alt="" onerror="this.style.display='none'">Business Details</div>
+          <div class="phone__img"></div>
+          <div class="phone__card"><div class="thumb"></div><div class="txt"><b>Interior Design Co.</b>Lekki, Lagos</div></div>
+          <div class="phone__rating">★★★★★ 4.9</div>
+        </div>
+        <div class="phone phone--front">
+          <div class="phone__head"><img src="logo.png" alt="" onerror="this.style.display='none'">NeilNest</div>
+          <div class="phone__title display">Find trusted<br><em>businesses near you.</em></div>
+          <div class="phone__search">Search business or service…</div>
+          <div class="phone__cats">
+            <div class="phone__cat"><div class="dot"></div>Design</div>
+            <div class="phone__cat"><div class="dot"></div>Home</div>
+            <div class="phone__cat"><div class="dot"></div>Fashion</div>
+          </div>
+          <div class="phone__card"><div class="thumb"></div><div class="txt"><b>Akintunde Daniel Studio</b>Sango Ota, Ogun</div></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section aria-label="Featured businesses">
+    <div class="shell">
+      <div class="featured-top">
+        <div class="section-head" style="margin-bottom:0;">
+          <div class="eyebrow">On NeilNest right now</div>
+          <h2 class="display">Real businesses, already listed.</h2>
+          <p>Explore verified businesses across different categories and locations.</p>
+        </div>
+        <a href="directory.html" class="link-arrow">View All Businesses<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+      <div id="featuredWrap">
+        <div class="feat-empty">Loading featured businesses…</div>
+      </div>
+      <div style="margin-top:26px;">
+        <a href="directory.html" class="btn-outline">Browse All Businesses<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Get started">
+    <div class="shell">
+      <div class="cta-banner">
+        <div class="cta-banner__left">
+          <div class="cta-banner__icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M9 20v-6h6v6"/><path d="M3 9a2.5 2.5 0 0 0 5 0M8 9a2.5 2.5 0 0 0 5 0M13 9a2.5 2.5 0 0 0 5 0"/></svg></div>
+          <div>
+            <h2 class="display">Your business belongs here <span class="gold">too.</span></h2>
+            <p>Join the directory Nigerians are actually using to find who they need.</p>
+          </div>
+        </div>
+        <div class="cta-banner__btns">
+          <a href="signup.html" class="btn-gold">List Your Business — Free<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a href="#how-it-works" class="btn-outline">How It Works<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M8 5l10 7-10 7V5z"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Why choose NeilNest">
+    <div class="shell">
+      <div class="why-head"><h2 class="display">Why thousands choose NeilNest</h2></div>
+      <div class="why-grid">
+        <div class="why-item">
+          <div class="why-item__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <h4>Verified & Trusted</h4>
+          <p>Every business is reviewed to ensure quality and authenticity.</p>
+        </div>
+        <div class="why-item">
+          <div class="why-item__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
+          <h4>Easy to Find</h4>
+          <p>Powerful search and filters help you find the right business fast.</p>
+        </div>
+        <div class="why-item">
+          <div class="why-item__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></div>
+          <h4>Grow Your Business</h4>
+          <p>Get discovered by more customers and grow your brand.</p>
+        </div>
+        <div class="why-item">
+          <div class="why-item__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-7h3v5zM3 19a2 2 0 0 0 2 2h1v-7H3v5z"/></svg></div>
+          <h4>We're Here to Help</h4>
+          <p>Our support team is always ready to assist you.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="How it works" id="how-it-works">
+    <div class="shell">
+      <div class="how-head"><h2 class="display">How NeilNest Works</h2></div>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-step__num">1</div>
+          <div><h4>Search or Browse</h4><p>Find businesses by category, location, or keyword.</p></div>
+        </div>
+        <div class="how-step">
+          <div class="how-step__num">2</div>
+          <div><h4>Connect</h4><p>View profiles, contact details, and connect with the right business.</p></div>
+        </div>
+        <div class="how-step">
+          <div class="how-step__num">3</div>
+          <div><h4>Grow</h4><p>Build relationships, get services, and grow your business.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="shell">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">
+            <img src="logo.png" alt="" onerror="this.style.display='none'">
+            <div><span>NeilNest</span><small>Connect. Grow. Thrive.</small></div>
+          </div>
+          <p class="footer-desc">NeilNest is Nigeria's trusted business directory connecting people with verified businesses across the country.</p>
+        </div>
+        <div class="footer-col">
+          <h5>Platform</h5>
+          <a href="directory.html">Directory</a>
+          <a href="signup.html">List a Business</a>
+          <a href="upgrade.html">Pricing</a>
+          <a href="#how-it-works">How It Works</a>
+        </div>
+        <div class="footer-col">
+          <h5>Account</h5>
+          <a href="signin.html">Sign In</a>
+          <a href="signup.html">Sign Up</a>
+          <a href="business-profile.html">My Dashboard</a>
+        </div>
+        <div class="footer-col">
+          <h5>Legal</h5>
+          <a href="terms.html">Terms & Conditions</a>
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="trust-safety.html">Trust & Safety</a>
+        </div>
+        <div class="newsletter">
+          <h5>Stay Updated</h5>
+          <p>Subscribe to get tips and updates for your business.</p>
+          <form id="newsletterForm">
+            <input type="email" id="newsletterEmail" placeholder="Enter your email" required>
+            <button type="submit" aria-label="Subscribe"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          </form>
+          <div class="note" id="newsletterNote"></div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="year"></span> NeilNest. All rights reserved.</span>
+        <span>Made for Nigerian businesses. ❤️</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  // Category dropdown — links into the real Directory page.
+  (function () {
+    const cats = ["Fragrance Store","Restaurant","Fitness Center","Beauty Spa","Fashion Retail","Real Estate Agency","Auto Repair","Bakery"];
+    document.getElementById("categoryDropdown").innerHTML =
+      cats.map((c) => `<a href="directory.html">${c}</a>`).join("");
+  })();
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script>
+  // ---- Splash progress: driven by real steps, not a fake timer. ----
+  // Ring circumference = 2 * PI * 46 ≈ 289.03 (matches stroke-dasharray in CSS).
+  const RING_CIRC = 289.03;
+  const gate = document.getElementById("authGate");
+  const ringFill = document.getElementById("spRingFill");
+  const statusEl = document.getElementById("spStatus");
+
+  function setSplashProgress(step, pct, label) {
+    gate.classList.remove("step-1", "step-2", "step-3");
+    gate.classList.add("step-" + step);
+    ringFill.style.strokeDashoffset = RING_CIRC - (RING_CIRC * pct) / 100;
+    statusEl.textContent = label;
+  }
+
+  function revealPage() {
+    setSplashProgress(3, 100, "Ready");
+    setTimeout(() => {
+      document.getElementById("page").classList.add("ready");
+      gate.classList.add("hidden");
+    }, 260); // let the final ring/tagline state register before it fades
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    let settled = false;
+    setSplashProgress(1, 15, "Checking your session");
+
+    auth.onAuthStateChanged(async (user) => {
+      if (settled) return;
+      settled = true;
+
+      if (user) {
+        setSplashProgress(2, 60, "Signed in");
+        window.location.href = "home.html";
+        return;
+      }
+
+      setSplashProgress(2, 55, "Finding businesses near you");
+      try {
+        await loadFeaturedBusinesses();
+      } catch (e) {
+        console.error("splash: featured businesses load failed", e);
+      }
+      revealPage();
+    });
+
+    // Hard cap so a stalled network never leaves someone stuck on the splash —
+    // still real: it just stops waiting and shows whatever's loaded so far.
+    setTimeout(() => { if (!settled) { settled = true; revealPage(); loadFeaturedBusinesses(); } }, 4000);
+
+    document.getElementById("newsletterForm").addEventListener("submit", handleNewsletterSubmit);
+  });
+
+  async function loadFeaturedBusinesses() {
+    const wrap = document.getElementById("featuredWrap");
+    try {
+      const snap = await db.collection(COLLECTIONS.businesses)
+        .orderBy("createdAt", "desc")
+        .limit(50)
+        .get();
+
+      const featured = snap.docs.filter((doc) => doc.data().featuredHome).slice(0, 8);
+
+      if (!featured.length) {
+        wrap.innerHTML = `<div class="feat-empty">No featured businesses yet — <a href="signup.html">be the first</a>.</div>`;
+        return;
+      }
+
+      wrap.innerHTML = featured.map((doc) => {
+        const b = doc.data();
+        const loc = b.location ? [b.location.city, b.location.state].filter(Boolean).join(", ") : "";
+        const img = b.coverUrl || b.logoUrl || "";
+        const rating = b.ratingAvg ? b.ratingAvg.toFixed(1) : null;
+        return `
+          <a href="business-profile.html?id=${doc.id}" class="feat-card">
+            ${img ? `<img class="feat-card__img" src="${img}" alt="" loading="lazy">` : `<div class="feat-card__img"></div>`}
+            <div class="feat-card__name">${(b.name || "Business").replace(/</g, "&lt;")}</div>
+            <div class="feat-card__cat">${(b.category || "").replace(/</g, "&lt;")}</div>
+            <div class="feat-card__loc">${loc.replace(/</g, "&lt;")}</div>
+            ${rating ? `<div class="feat-card__rating"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z"/></svg>${rating} (${b.ratingCount || 0})</div>` : ""}
+            <div class="feat-card__btn">View Profile</div>
+          </a>`;
+      }).join("");
+    } catch (err) {
+      console.error("loadFeaturedBusinesses error:", err);
+      wrap.innerHTML = `<div class="feat-empty">Couldn't load businesses right now — <a href="directory.html">browse the full directory</a> instead.</div>`;
+    }
+  }
+
+  async function handleNewsletterSubmit(e) {
+    e.preventDefault();
+    const input = document.getElementById("newsletterEmail");
+    const note = document.getElementById("newsletterNote");
+    const email = input.value.trim();
+    if (!email) return;
+    try {
+      await db.collection("newsletterSubscribers").add({
+        email, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      input.value = "";
+      note.textContent = "Subscribed — thanks!";
+      note.style.color = "#4ade80";
+    } catch (err) {
+      console.error("newsletter submit error:", err);
+      note.textContent = "Couldn't subscribe — try again.";
+      note.style.color = "#f87171";
+    }
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Create Account — NeilNest</title>
+<script src="theme.js"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GH6R4GXT58"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-GH6R4GXT58');
+</script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #000; --surface-0: #0a0a0a; --surface-1: #101010; --surface-2: #141414;
+    --surface-3: #1a1a1a; --surface-4: #262626;
+    --text-primary: #fff; --text-secondary: #a8a8a8; --text-faint: #7a7a7a; --text-dim: #6e6e6e;
+    --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.14);
+    --gold: #e0a83c; --gold-deep: #d99a2b; --gold-text-on: #1a1200;
+    --success: #37c65f; --danger: #e14b4b;
+  }
+  [data-theme="light"] {
+    --bg: #F7F7F9; --surface-0: #FFFFFF; --surface-1: #FFFFFF; --surface-2: #FFFFFF;
+    --surface-3: #F0EFF3; --surface-4: #E8E7EC;
+    --text-primary: #1A1A1E; --text-secondary: #46424F; --text-faint: #6B6875; --text-dim: #8A8694;
+    --border: #E8E7EC; --border-strong: #DAD8E0;
+    --gold: #C7862A; --gold-deep: #B8791F; --gold-text-on: #1a1200;
+    --success: #157F41; --danger: #D14343;
+  }
+  html, body { background: var(--bg); height: 100%; }
+  body {
+    font-family: -apple-system, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
+    color: var(--text-primary); font-size: 14px; line-height: 1.4;
+    transition: background 0.25s ease, color 0.25s ease;
+  }
+  a { text-decoration: none; color: inherit; touch-action: manipulation; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; touch-action: manipulation; }
+  a, button { -webkit-user-select: none; user-select: none; }
+  a:active, button:active { opacity: 0.72; }
+  input, select, textarea { font-family: inherit; color: var(--text-primary); }
+
+  .auth-shell {
+    max-width: 390px; margin: 0 auto; min-height: 100dvh;
+    padding: 20px 24px 40px; position: relative;
+  }
+
+  .onboarding-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; gap: 12px; }
+  .auth-back {
+    width: 38px; height: 38px; border-radius: 50%; background: var(--surface-2);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .progress-track { flex: 1; display: flex; gap: 6px; }
+  .progress-track span { flex: 1; height: 4px; border-radius: 2px; background: var(--surface-4); transition: background 0.25s ease; }
+  .progress-track span.done { background: var(--gold); }
+  .progress-step-label { font-size: 13px; color: var(--text-secondary); font-weight: 600; flex-shrink: 0; }
+
+  .auth-title-block h1 { font-size: 28px; font-weight: 800; line-height: 1.15; }
+  .auth-title-block .accent { color: var(--gold); }
+  .auth-title-block p { color: var(--text-secondary); margin: 8px 0 24px; font-size: 14px; }
+
+  .field-group { margin-bottom: 16px; }
+  .field-group label.field-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-secondary); }
+  .input-wrap {
+    display: flex; align-items: center; gap: 10px; height: 54px;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 0 16px;
+    transition: border-color 0.15s ease;
+  }
+  .input-wrap:focus-within { border-color: var(--gold-deep); }
+  .input-wrap svg { width: 19px; height: 19px; color: var(--gold); flex-shrink: 0; }
+  .input-wrap input, .input-wrap select {
+    flex: 1; background: transparent; border: none; outline: none;
+    font-size: 15px; color: var(--text-primary); height: 100%; min-width: 0;
+  }
+  .input-wrap select option { background: var(--surface-1); }
+  .input-wrap input::placeholder { color: var(--text-dim); }
+  .toggle-visibility { color: var(--text-faint); flex-shrink: 0; padding: 6px; margin: -6px; }
+  textarea.plain-textarea {
+    width: 100%; min-height: 100px; background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px; font-size: 14.5px; color: var(--text-primary); outline: none; resize: none;
+  }
+  textarea.plain-textarea::placeholder { color: var(--text-dim); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .strength-track { display: flex; gap: 6px; margin-top: 10px; }
+  .strength-track span { flex: 1; height: 4px; border-radius: 2px; background: var(--surface-4); transition: background 0.2s ease; }
+  .strength-track span.filled { background: var(--gold); }
+  .strength-label { font-size: 13px; color: var(--text-secondary); margin-top: 8px; }
+  .strength-label .value { font-weight: 700; }
+  .strength-label .value--strong { color: var(--success); }
+  .strength-label .value--weak { color: var(--danger); }
+  .strength-label .value--medium { color: var(--gold); }
+
+  .section-label { font-weight: 700; margin: 18px 0 4px; }
+
+  .account-type-row { display: flex; gap: 12px; margin: 10px 0 4px; }
+  .account-type-card {
+    flex: 1; border: 1.5px solid var(--border); border-radius: 14px;
+    padding: 14px; position: relative; display: flex; flex-direction: column; gap: 8px;
+  }
+  .account-type-card.selected { border-color: var(--gold-deep); background: rgba(224,168,60,0.06); }
+  .account-type-card .icon-circle {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--surface-3);
+    display: flex; align-items: center; justify-content: center; color: var(--gold);
+  }
+  .account-type-card .title { font-weight: 700; font-size: 14px; }
+  .account-type-card .subtitle { font-size: 12px; color: var(--text-secondary); }
+  .account-type-card .check-mark {
+    position: absolute; top: 10px; right: 10px; width: 18px; height: 18px;
+    border-radius: 50%; background: var(--gold); display: none; align-items: center; justify-content: center;
+  }
+  .account-type-card.selected .check-mark { display: flex; }
+
+  .checkbox-row { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--text-secondary); margin: 18px 0; }
+  .checkbox-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--gold); margin-top: 1px; flex-shrink: 0; }
+  .checkbox-row a { color: var(--gold); font-weight: 600; }
+
+  .btn {
+    height: 52px; border-radius: 14px; display: flex; align-items: center;
+    justify-content: center; gap: 8px; font-size: 15px; font-weight: 700; width: 100%;
+  }
+  .btn-primary { background: linear-gradient(135deg, #f0c25c 0%, #dd9c2c 100%); color: var(--gold-text-on); }
+  .btn:disabled { opacity: 0.5; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row .btn-back-secondary {
+    width: 52px; height: 52px; flex-shrink: 0; border-radius: 14px; background: var(--surface-2);
+    border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center;
+  }
+
+  .auth-footer-link { text-align: center; font-size: 13px; color: var(--text-secondary); margin-top: 16px; }
+  .auth-footer-link a { color: var(--gold); font-weight: 600; }
+
+  .wizard-step { display: none; }
+  .wizard-step.active { display: block; }
+
+  /* Step 4 review */
+  .review-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 20px; }
+  .review-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); gap: 10px; }
+  .review-row:last-child { border-bottom: none; }
+  .review-row .k { font-size: 12.5px; color: var(--text-secondary); flex-shrink: 0; }
+  .review-row .v { font-size: 13px; font-weight: 600; text-align: right; }
+
+  #toast-host { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 8px; width: calc(100% - 40px); max-width: 350px; }
+</style>
+</head>
+<body>
+
+<div class="auth-shell">
+  <div class="onboarding-header">
+    <button class="auth-back" id="wizardBackBtn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="progress-track" id="progressTrack">
+      <span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span>
+    </div>
+    <div class="progress-step-label" id="progressLabel">1/4</div>
+  </div>
+
+  <div class="auth-title-block">
+    <h1 id="stepTitle">Create your <span class="accent">account</span> ✨</h1>
+    <p id="stepSubtitle">Join thousands of businesses and professionals on NeilNest.</p>
+  </div>
+
+  <form id="signup-form" novalidate>
+
+    <!-- STEP 1 — Account basics -->
+    <section class="wizard-step active" data-step="1">
+      <div class="field-group">
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg>
+          <input id="fullName" type="text" placeholder="Full name" required>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>
+          <input id="email" type="email" placeholder="Email address" required>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h3l2 5-2 1a11 11 0 0 0 6 6l1-2 5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 4 5a2 2 0 0 1 2-2z"/></svg>
+          <input id="phone" type="tel" placeholder="Phone number" required>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <input id="password" type="password" placeholder="Create password" required>
+          <button type="button" class="toggle-visibility" id="toggle-pw">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" id="eye-icon"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="strength-track" id="strength-track">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="strength-label">Password strength: <span class="value" id="strength-label">—</span></div>
+      </div>
+
+      <div class="section-label">I am a:</div>
+      <div class="account-type-row">
+        <button type="button" class="account-type-card selected" data-type="business">
+          <span class="check-mark"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--gold-text-on)" stroke-width="3"><path d="M5 12l5 5 9-10"/></svg></span>
+          <span class="icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9l1-5h14l1 5"/><path d="M4 9h16v10H4z"/><path d="M9 19v-5h6v5"/></svg></span>
+          <span class="title">Business</span>
+          <span class="subtitle">Find & connect</span>
+        </button>
+        <button type="button" class="account-type-card" data-type="professional">
+          <span class="check-mark"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--gold-text-on)" stroke-width="3"><path d="M5 12l5 5 9-10"/></svg></span>
+          <span class="icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg></span>
+          <span class="title">Professional</span>
+          <span class="subtitle">Offer services</span>
+        </button>
+      </div>
+
+      <label class="checkbox-row">
+        <input type="checkbox" id="agree-terms" checked>
+        <span>I agree to the <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a></span>
+      </label>
+      <input type="hidden" id="accountType" value="business">
+    </section>
+
+    <!-- STEP 2 — Category / Profession -->
+    <section class="wizard-step" data-step="2">
+      <div class="field-group" id="businessNameGroup">
+        <label class="field-label">Business Name</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 21V7l8-4 8 4v14"/><path d="M9 21v-6h6v6"/></svg>
+          <input id="businessName" type="text" placeholder="Enter business name">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label" id="categoryLabel">Business Category</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <select id="category">
+            <option value="">Select category</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group" id="categoryOtherGroup" style="display:none;">
+        <label class="field-label" id="categoryOtherLabel">Category Name</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <input id="categoryOther" type="text" placeholder="Type your category">
+        </div>
+      </div>
+      <div class="field-group" id="skillsGroup" style="display:none;">
+        <label class="field-label">Skills</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3 6 6.5 1-4.7 4.6L18 20l-6-3.4L6 20l1.2-6.4L2.5 9l6.5-1 3-6z"/></svg>
+          <input id="skills" type="text" placeholder="e.g. Plumbing, Electrical, Design">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Short Bio <span style="color:var(--text-dim);font-weight:500;">(Optional)</span></label>
+        <textarea class="plain-textarea" id="bio" maxlength="300" placeholder="Tell people a bit about yourself or your business..."></textarea>
+      </div>
+    </section>
+
+    <!-- STEP 3 — Location -->
+    <section class="wizard-step" data-step="3">
+      <div class="field-group">
+        <label class="field-label">Country</label>
+        <div class="input-wrap">
+          <select id="country">
+            <option value="Nigeria">Nigeria</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field-group">
+          <label class="field-label">State</label>
+          <div class="input-wrap">
+            <select id="state">
+              <option value="">Select state</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">City</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.5 7-11.5A7 7 0 0 0 5 9.5C5 14.5 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
+            <input id="city" type="text" placeholder="City / Area">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 4 — Review & create -->
+    <section class="wizard-step" data-step="4">
+      <div class="review-card">
+        <div class="review-row"><span class="k">Full Name</span><span class="v" id="rvFullName">—</span></div>
+        <div class="review-row"><span class="k">Email</span><span class="v" id="rvEmail">—</span></div>
+        <div class="review-row"><span class="k">Phone Number</span><span class="v" id="rvPhone">—</span></div>
+        <div class="review-row"><span class="k">Account Type</span><span class="v" id="rvAccountType">—</span></div>
+        <div class="review-row"><span class="k" id="rvCategoryLabel">Business Category</span><span class="v" id="rvCategory">—</span></div>
+        <div class="review-row"><span class="k">Location</span><span class="v" id="rvLocation">—</span></div>
+      </div>
+    </section>
+
+  </form>
+
+  <div class="btn-row">
+    <button type="button" class="btn-back-secondary" id="stepBackBtn" style="display:none;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <button type="button" class="btn btn-primary" id="stepNextBtn">
+      <span id="stepNextLabel">Next</span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </button>
+  </div>
+
+  <div class="auth-footer-link">Already have an account? <a href="signin.html">Sign in</a></div>
+</div>
+
+<div id="toast-host"></div>
+
+<script>
+  const CATEGORY_OPTIONS = [
+    "Fragrance Store","Shortlet Apartments","Restaurant","Fitness Center",
+    "Photography Studio","Beauty Spa","Coworking Space","Fashion Retail",
+    "Real Estate Agency","Electronics Store","Event Planning","Cleaning Services",
+    "Auto Repair","Salon & Barbershop","Bakery","Grocery Store",
+    "Logistics & Delivery","Law Firm","Medical Clinic","Education & Tutoring",
+    "IT Services","Interior Design","Construction","Other"
+  ];
+  const PROFESSION_OPTIONS = [
+    "Photographer","Graphic Designer","Web Developer","Plumber","Electrician",
+    "Makeup Artist","Tailor / Fashion Designer","Interior Decorator","Caterer",
+    "Event Planner","Fitness Trainer","Tutor","Accountant","Lawyer",
+    "Consultant","Mechanic","Cleaner","Video Editor","Social Media Manager","Other"
+  ];
+  const NIGERIAN_STATES = [
+    "Abia","Adamawa","Akwa Ibom","Anambra","Bauchi","Bayelsa","Benue","Borno",
+    "Cross River","Delta","Ebonyi","Edo","Ekiti","Enugu","Gombe","Imo","Jigawa",
+    "Kaduna","Kano","Katsina","Kebbi","Kogi","Kwara","Lagos","Nasarawa","Niger",
+    "Ogun","Ondo","Osun","Oyo","Plateau","Rivers","Sokoto","Taraba","Yobe",
+    "Zamfara","FCT - Abuja"
+  ];
+
+  let currentStep = 1;
+  let accountType = "business";
+
+  function populateSelect(id, items) {
+    const sel = document.getElementById(id);
+    items.forEach(v => { const o = document.createElement("option"); o.value = v; o.textContent = v; sel.appendChild(o); });
+  }
+  populateSelect("state", NIGERIAN_STATES);
+
+  function renderCategoryOptions() {
+    const sel = document.getElementById("category");
+    sel.innerHTML = '<option value="">Select ' + (accountType === "business" ? "category" : "profession") + '</option>';
+    const opts = accountType === "business" ? CATEGORY_OPTIONS : PROFESSION_OPTIONS;
+    opts.forEach(v => { const o = document.createElement("option"); o.value = v; o.textContent = v; sel.appendChild(o); });
+    document.getElementById("categoryOtherGroup").style.display = "none";
+    document.getElementById("categoryOther").value = "";
+  }
+  renderCategoryOptions();
+
+  document.getElementById("category").addEventListener("change", (e) => {
+    const isOther = e.target.value === "Other";
+    document.getElementById("categoryOtherGroup").style.display = isOther ? "block" : "none";
+    document.getElementById("categoryOtherLabel").textContent = accountType === "business" ? "Category Name" : "Profession Name";
+    document.getElementById("categoryOther").placeholder = accountType === "business" ? "Type your category" : "Type your profession";
+    if (!isOther) document.getElementById("categoryOther").value = "";
+  });
+
+  document.querySelectorAll(".account-type-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      document.querySelectorAll(".account-type-card").forEach((c) => c.classList.remove("selected"));
+      card.classList.add("selected");
+      accountType = card.dataset.type;
+      document.getElementById("accountType").value = accountType;
+      document.getElementById("businessNameGroup").style.display = accountType === "business" ? "block" : "none";
+      document.getElementById("skillsGroup").style.display = accountType === "professional" ? "block" : "none";
+      document.getElementById("categoryLabel").textContent = accountType === "business" ? "Business Category" : "Profession";
+      renderCategoryOptions();
+    });
+  });
+
+  document.getElementById("toggle-pw").addEventListener("click", () => {
+    const pw = document.getElementById("password");
+    const isHidden = pw.type === "password";
+    pw.type = isHidden ? "text" : "password";
+    document.getElementById("eye-icon").innerHTML = isHidden
+      ? '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/><line x1="3" y1="21" x2="21" y2="3" stroke-width="1.8"/>'
+      : '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>';
+  });
+
+  function scorePassword(pw) {
+    let score = 0;
+    if (pw.length >= 8) score++;
+    if (/[A-Z]/.test(pw)) score++;
+    if (/[0-9]/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    if (pw.length >= 12) score++;
+    return score;
+  }
+  document.getElementById("password").addEventListener("input", (e) => {
+    const score = scorePassword(e.target.value);
+    const bars = document.querySelectorAll("#strength-track span");
+    bars.forEach((b, i) => b.classList.toggle("filled", i < score));
+    const label = document.getElementById("strength-label");
+    if (!e.target.value) { label.textContent = "—"; label.className = "value"; }
+    else if (score <= 2) { label.textContent = "Weak"; label.className = "value value--weak"; }
+    else if (score <= 3) { label.textContent = "Medium"; label.className = "value value--medium"; }
+    else { label.textContent = "Strong"; label.className = "value value--strong"; }
+  });
+
+  const STEP_TITLES = {
+    1: { title: 'Create your <span class="accent">account</span> ✨', sub: "Join thousands of businesses and professionals on NeilNest." },
+    2: { title: 'Tell us <span class="accent">more</span>', sub: "This helps people find and trust you." },
+    3: { title: 'Where are <span class="accent">you</span>?', sub: "So nearby customers can find you." },
+    4: { title: 'Review & <span class="accent">create</span>', sub: "Check everything looks right before we create your account." }
+  };
+
+  function goToStep(step) {
+    currentStep = step;
+    document.querySelectorAll(".wizard-step").forEach(s => s.classList.toggle("active", parseInt(s.dataset.step, 10) === step));
+    document.querySelectorAll("#progressTrack .seg").forEach((seg, i) => seg.classList.toggle("done", i < step));
+    document.getElementById("progressLabel").textContent = step + "/4";
+    document.getElementById("stepTitle").innerHTML = STEP_TITLES[step].title;
+    document.getElementById("stepSubtitle").textContent = STEP_TITLES[step].sub;
+    document.getElementById("stepBackBtn").style.display = step === 1 ? "none" : "flex";
+    document.getElementById("stepNextLabel").textContent = step === 4 ? "Create Account" : "Next";
+    if (step === 4) populateReview();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function validateStep(step) {
+    if (step === 1) {
+      const fullName = document.getElementById("fullName").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const password = document.getElementById("password").value;
+      const agree = document.getElementById("agree-terms").checked;
+      if (!fullName || !email || !phone || !password) { showToast("Please fill in every field.", "error"); return false; }
+      if (password.length < 6) { showToast("Password must be at least 6 characters.", "error"); return false; }
+      if (!agree) { showToast("Please agree to the Terms of Service to continue.", "error"); return false; }
+      return true;
+    }
+    if (step === 2) {
+      if (accountType === "business" && !document.getElementById("businessName").value.trim()) {
+        showToast("Please enter your business name.", "error"); return false;
+      }
+      if (!document.getElementById("category").value) {
+        showToast(accountType === "business" ? "Please select a business category." : "Please select your profession.", "error");
+        return false;
+      }
+      if (document.getElementById("category").value === "Other" && !document.getElementById("categoryOther").value.trim()) {
+        showToast(accountType === "business" ? "Please type your business category." : "Please type your profession.", "error");
+        return false;
+      }
+      return true;
+    }
+    if (step === 3) {
+      if (!document.getElementById("state").value || !document.getElementById("city").value.trim()) {
+        showToast("Please complete your location.", "error"); return false;
+      }
+      return true;
+    }
+    return true;
+  }
+
+  function resolvedCategoryValue() {
+    const sel = document.getElementById("category").value;
+    if (sel === "Other") return document.getElementById("categoryOther").value.trim();
+    return sel;
+  }
+
+  function populateReview() {
+    document.getElementById("rvFullName").textContent = document.getElementById("fullName").value.trim();
+    document.getElementById("rvEmail").textContent = document.getElementById("email").value.trim();
+    document.getElementById("rvPhone").textContent = document.getElementById("phone").value.trim();
+    document.getElementById("rvAccountType").textContent = accountType === "business" ? "Business" : "Professional";
+    document.getElementById("rvCategoryLabel").textContent = accountType === "business" ? "Business Category" : "Profession";
+    document.getElementById("rvCategory").textContent = resolvedCategoryValue() || "—";
+    document.getElementById("rvLocation").textContent = [document.getElementById("city").value.trim(), document.getElementById("state").value].filter(Boolean).join(", ") || "—";
+  }
+
+  document.getElementById("stepBackBtn").addEventListener("click", () => goToStep(currentStep - 1));
+  document.getElementById("wizardBackBtn").addEventListener("click", () => {
+    if (currentStep > 1) goToStep(currentStep - 1); else history.back();
+  });
+
+  document.getElementById("stepNextBtn").addEventListener("click", async () => {
+    if (currentStep < 4) {
+      if (!validateStep(currentStep)) return;
+      goToStep(currentStep + 1);
+      return;
+    }
+    // Step 4 — actually create the account
+    const payload = {
+      fullName: document.getElementById("fullName").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      phone: document.getElementById("phone").value.trim(),
+      password: document.getElementById("password").value,
+      accountType,
+      businessName: document.getElementById("businessName").value.trim(),
+      category: accountType === "business" ? resolvedCategoryValue() : "",
+      profession: accountType === "professional" ? resolvedCategoryValue() : "",
+      skills: document.getElementById("skills").value.trim(),
+      bio: document.getElementById("bio").value.trim(),
+      location: {
+        country: document.getElementById("country").value,
+        state: document.getElementById("state").value,
+        city: document.getElementById("city").value.trim()
+      }
+    };
+
+    const btn = document.getElementById("stepNextBtn");
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="auth-mini-spinner" style="width:16px;height:16px;border-radius:50%;border:2px solid rgba(26,18,0,0.3);border-top-color:var(--gold-text-on);display:inline-block;animation:auth-spin 0.7s linear infinite;"></span><span>Creating account…</span>';
+    if (!document.getElementById("auth-spin-style")) {
+      const style = document.createElement("style");
+      style.id = "auth-spin-style";
+      style.textContent = "@keyframes auth-spin{to{transform:rotate(360deg)}}";
+      document.head.appendChild(style);
+    }
+
+    try {
+      await window.createNeilNestAccount(payload);
+      showToast("✅ Account created successfully.", "success");
+      setTimeout(() => { window.location.href = "verify-email.html"; }, 700);
+    } catch (err) {
+      console.error("Create account error:", err);
+      showToast((window.friendlyAuthError ? friendlyAuthError(err) : err.message) || "Something went wrong.", "error");
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  });
+
+  document.getElementById("signup-form").addEventListener("submit", (e) => e.preventDefault());
+</script>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="auth.js"></script>
+</body>
+</html>

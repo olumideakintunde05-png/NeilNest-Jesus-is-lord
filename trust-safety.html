@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Trust & Safety — NeilNest</title>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GH6R4GXT58"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-GH6R4GXT58');
+</script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { background: #000; height: 100%; }
+  body { font-family: -apple-system, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif; color: #fff; font-size: 14px; line-height: 1.4; }
+  a { text-decoration: none; color: inherit; touch-action: manipulation; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; touch-action: manipulation; }
+  a:active, button:active { opacity: 0.72; }
+
+  .app-shell { max-width: 390px; margin: 0 auto; min-height: 100dvh; padding: 20px 20px 50px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+
+  .top-row { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+  .back-btn { width: 38px; height: 38px; border-radius: 50%; background: #141414; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .top-title { font-size: 20px; font-weight: 800; }
+  .top-subtitle { color: #a8a8a8; font-size: 13.5px; margin: 4px 0 20px 50px; }
+
+  .tab-bar { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 20px; }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn { flex-shrink: 0; padding: 9px 14px; border-radius: 999px; background: #141414; border: 1px solid rgba(255,255,255,0.08); font-size: 12.5px; font-weight: 700; color: #a8a8a8; }
+  .tab-btn.active { background: rgba(224,168,60,0.12); border-color: #e0a83c; color: #e0a83c; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .safety-card { background: #101010; border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+  .safety-card .ic { width: 34px; height: 34px; border-radius: 10px; background: rgba(224,168,60,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+  .safety-card .ic svg { width: 16px; height: 16px; color: #e0a83c; }
+  .safety-card .sc-title { font-size: 13.5px; font-weight: 800; margin-bottom: 4px; }
+  .safety-card .sc-desc { font-size: 12px; color: #a8a8a8; line-height: 1.55; }
+
+  .rule-row { display: flex; gap: 10px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .rule-row:last-child { border-bottom: none; }
+  .rule-row .num { width: 22px; height: 22px; border-radius: 50%; background: rgba(224,168,60,0.12); color: #e0a83c; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .rule-row .txt { font-size: 12.5px; color: #d8d8d8; line-height: 1.5; padding-top: 1px; }
+
+  .faq-item { background: #101010; border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; margin-bottom: 10px; overflow: hidden; }
+  .faq-q { padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .faq-q svg { width: 15px; height: 15px; color: #a8a8a8; transition: transform 0.2s ease; flex-shrink: 0; }
+  .faq-item.open .faq-q svg { transform: rotate(180deg); }
+  .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
+  .faq-item.open .faq-a { max-height: 300px; }
+  .faq-a p { padding: 0 16px 14px; font-size: 12.5px; color: #a8a8a8; line-height: 1.6; }
+
+  .report-item { display: flex; align-items: center; gap: 12px; background: #101010; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 13px 14px; margin-bottom: 9px; }
+  .report-item .r-type { width: 36px; height: 36px; border-radius: 10px; background: rgba(224,168,60,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .report-item .r-type svg { width: 16px; height: 16px; color: #e0a83c; }
+  .report-item .r-body { flex: 1; min-width: 0; }
+  .report-item .r-reason { font-size: 13px; font-weight: 700; }
+  .report-item .r-meta { font-size: 11px; color: #a8a8a8; margin-top: 2px; }
+  .r-status { font-size: 9.5px; font-weight: 800; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; flex-shrink: 0; }
+  .r-status--pending { background: rgba(224,168,60,0.18); color: #f0cf8e; }
+  .r-status--investigating { background: rgba(224,168,60,0.18); color: #f0cf8e; }
+  .r-status--resolved { background: rgba(52,168,83,0.18); color: #8fe3a8; }
+  .r-status--dismissed { background: #2a2a2a; color: #b8b8b8; }
+
+  .blocked-item { display: flex; align-items: center; gap: 12px; background: #101010; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 12px 14px; margin-bottom: 9px; }
+  .blocked-item img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; background: #1e1e1e; flex-shrink: 0; }
+  .blocked-item .b-name { font-size: 13px; font-weight: 700; flex: 1; }
+  .unblock-btn { font-size: 11.5px; font-weight: 700; color: #e0a83c; padding: 7px 12px; border: 1px solid rgba(224,168,60,0.3); border-radius: 10px; }
+
+  .empty-note { text-align: center; color: #6e6e6e; font-size: 12.5px; padding: 30px 0; }
+  .skel { background: linear-gradient(90deg, #141414 25%, #1c1c1c 37%, #141414 63%); background-size: 400% 100%; animation: skel 1.4s ease infinite; border-radius: 14px; height: 60px; margin-bottom: 9px; }
+  @keyframes skel { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+
+  #toast-host { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 8px; width: calc(100% - 40px); max-width: 350px; }
+  .toast { display: flex; align-items: center; gap: 10px; background: #161616; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 13px 16px; font-size: 13px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+</style>
+</head>
+<body>
+<div class="app-shell" id="appShell">
+  <div class="top-row">
+    <button class="back-btn" id="backBtn" aria-label="Back"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="top-title">Trust &amp; Safety</div>
+  </div>
+  <div class="top-subtitle">Stay safe while buying and selling.</div>
+
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-btn active" data-tab="tips">Safety Tips</button>
+    <button class="tab-btn" data-tab="rules">Marketplace Rules</button>
+    <button class="tab-btn" data-tab="reports">My Reports</button>
+    <button class="tab-btn" data-tab="blocked">Blocked</button>
+    <button class="tab-btn" data-tab="faq">FAQ</button>
+  </div>
+
+  <div class="tab-panel active" id="panel-tips"></div>
+  <div class="tab-panel" id="panel-rules"></div>
+  <div class="tab-panel" id="panel-reports">
+    <div class="skel"></div><div class="skel"></div>
+  </div>
+  <div class="tab-panel" id="panel-blocked">
+    <div class="skel"></div>
+  </div>
+  <div class="tab-panel" id="panel-faq"></div>
+
+  <div id="toast-host"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="auth-guard.js"></script>
+<script src="billing.js"></script>
+<script src="trustsafety-core.js"></script>
+<script src="trust-safety.js"></script>
+</body>
+</html>

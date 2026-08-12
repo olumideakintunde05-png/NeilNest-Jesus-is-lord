@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>NeilNest · Directory</title>
+<script src="theme.js"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GH6R4GXT58"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-GH6R4GXT58');
+</script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  /* ---------- Theme tokens (same names/pattern as home.html) ---------- */
+  :root {
+    --bg: #000;
+    --surface-0: #0a0a0a;
+    --surface-1: #101010;
+    --surface-2: #141414;
+    --surface-3: #1a1a1a;
+    --surface-4: #1e1e1e;
+    --text-primary: #fff;
+    --text-secondary: #a8a8a8;
+    --text-faint: #7a7a7a;
+    --text-dim: #6e6e6e;
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.14);
+    --gold: #e0a83c;
+    --gold-deep: #d99a2b;
+    --gold-text-on: #1a1200;
+    --success: #37c65f;
+    --success-bg: #1e7d43;
+    --success-text: #e8fbef;
+    --danger: #e14b4b;
+  }
+  [data-theme="light"] {
+    --bg: #F7F7F9;
+    --surface-0: #FFFFFF;
+    --surface-1: #FFFFFF;
+    --surface-2: #FFFFFF;
+    --surface-3: #F0EFF3;
+    --surface-4: #E8E7EC;
+    --text-primary: #1A1A1E;
+    --text-secondary: #46424F;
+    --text-faint: #6B6875;
+    --text-dim: #8A8694;
+    --border: #E8E7EC;
+    --border-strong: #DAD8E0;
+    --gold: #C7862A;
+    --gold-deep: #B8791F;
+    --gold-text-on: #1a1200;
+    --success: #157F41;
+    --success-bg: #DCFCE7;
+    --success-text: #15803D;
+    --danger: #D14343;
+  }
+  html, body { background: var(--bg); height: 100%; }
+  body {
+    font-family: -apple-system, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.4;
+    transition: background 0.25s ease, color 0.25s ease;
+  }
+  a { text-decoration: none; color: inherit; touch-action: manipulation; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; touch-action: manipulation; }
+  img { display: block; max-width: 100%; }
+  a, button { -webkit-user-select: none; user-select: none; }
+  a:active, button:active { opacity: 0.72; }
+
+  .app-shell {
+    max-width: 390px;
+    margin: 0 auto;
+    min-height: 100dvh;
+    position: relative;
+    background: var(--bg);
+    padding-bottom: 100px;
+  }
+
+  /* ---------- Header ---------- */
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 12px;
+  }
+  .app-header__brand { display: flex; align-items: center; gap: 10px; }
+  .app-header__logo { width: 36px; height: 36px; flex-shrink: 0; }
+  .app-header__title { font-size: 19px; font-weight: 700; }
+  .app-header__tagline { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+  .app-header__actions { display: flex; align-items: center; gap: 14px; }
+  .icon-btn {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .badge-dot {
+    position: absolute; top: -2px; right: -2px;
+    min-width: 18px; height: 18px; padding: 0 4px;
+    border-radius: 999px; background: var(--gold); color: var(--gold-text-on);
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .avatar-wrap { position: relative; display: inline-block; }
+  .avatar-online-dot {
+    position: absolute; bottom: 0; right: 0; width: 11px; height: 11px;
+    border-radius: 50%; background: var(--success); border: 2px solid var(--bg);
+  }
+  .avatar-initials {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: var(--gold);
+    background: var(--surface-1); border: 1.5px solid var(--gold-deep);
+  }
+
+  /* ---------- Dropdown panels ---------- */
+  .dropdown-overlay { position: fixed; inset: 0; z-index: 199; display: none; }
+  .dropdown-overlay.open { display: block; }
+
+  .dropdown-panel {
+    position: absolute; z-index: 200;
+    background: var(--surface-2); border: 1px solid var(--border-strong);
+    border-radius: 16px; box-shadow: 0 12px 34px rgba(0,0,0,0.55);
+    opacity: 0; transform: translateY(-6px) scale(0.98);
+    pointer-events: none; transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+  .dropdown-panel.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+
+  .notif-panel { top: 64px; right: 20px; width: 280px; overflow: hidden; }
+  .notif-panel__head { padding: 14px 16px; font-weight: 700; font-size: 14px; border-bottom: 1px solid var(--border); }
+  .notif-item { display: flex; gap: 10px; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); cursor: pointer; transition: background 0.15s ease; }
+  .notif-item:last-child { border-bottom: none; }
+  .notif-item:active, .notif-item:focus-visible { background: rgba(255,255,255,0.06); outline: none; }
+  .notif-item .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); margin-top: 6px; flex-shrink: 0; }
+  .notif-item .dot.read { background: transparent; }
+  .notif-item .title { font-size: 13px; font-weight: 600; }
+  .notif-item .time { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+
+  .profile-menu { top: 64px; right: 20px; width: 190px; padding: 8px; }
+  .profile-menu a { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 10px; border-radius: 10px; font-size: 13.5px; font-weight: 600; text-align: left; color: var(--text-primary); }
+  .profile-menu a:active { background: rgba(255,255,255,0.06); opacity: 1; }
+  .profile-menu a svg { width: 16px; height: 16px; color: var(--gold); flex-shrink: 0; }
+  .profile-menu a.danger svg, .profile-menu a.danger { color: var(--danger); }
+  .profile-menu hr { border: none; border-top: 1px solid var(--border); margin: 6px 0; }
+
+  .picker-panel { top: 100%; margin-top: 8px; left: 0; width: 230px; padding: 8px; max-height: 320px; overflow-y: auto; }
+  .picker-panel button {
+    width: 100%; display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 12px; border-radius: 10px; font-size: 13.5px; font-weight: 600; text-align: left;
+  }
+  .picker-panel button:active { background: rgba(255,255,255,0.06); opacity: 1; }
+  .picker-panel button.selected { color: var(--gold); }
+  .picker-panel button.selected svg.check { display: inline-block; }
+  .picker-panel button svg.check { display: none; width: 15px; height: 15px; flex-shrink: 0; }
+  .picker-panel__label { display: flex; align-items: center; gap: 9px; min-width: 0; }
+  .picker-panel__label svg.opt-icon { width: 15px; height: 15px; color: var(--text-secondary); flex-shrink: 0; }
+  .picker-panel button.selected svg.opt-icon { color: var(--gold); }
+
+  /* ---------- Page title ---------- */
+  .page-title-block { padding: 4px 20px 16px; }
+  .page-title { font-size: 30px; font-weight: 800; }
+  .page-subtitle { font-size: 13.5px; color: var(--text-secondary); margin-top: 4px; }
+
+  /* ---------- Search bar ---------- */
+  .home-search {
+    display: flex; align-items: center; gap: 10px; height: 52px;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 14px; padding: 0 16px; margin: 0 20px 14px;
+  }
+  .home-search svg { width: 19px; height: 19px; color: var(--text-faint); flex-shrink: 0; }
+  .home-search input { flex: 1; background: transparent; border: none; outline: none; color: var(--text-primary); font-size: 15px; min-width: 0; }
+  .home-search input::placeholder { color: var(--text-dim); }
+  .home-search .divider { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
+  .home-search .filter-icon { color: var(--gold); }
+
+  /* ---------- Filter row (Categories / Location / Sort) ---------- */
+  .filter-row { display: flex; gap: 10px; padding: 0 20px 16px; }
+  .filter-row .filter-pill-wrap { position: relative; flex: 1; min-width: 0; }
+  .filter-pill {
+    width: 100%; display: flex; align-items: center; gap: 6px;
+    height: 42px; padding: 0 12px; border-radius: 12px;
+    background: var(--surface-1); border: 1px solid var(--border);
+    font-size: 12.5px; font-weight: 600; color: var(--text-primary);
+  }
+  .filter-pill svg.lead { width: 15px; height: 15px; color: var(--gold); flex-shrink: 0; }
+  .filter-pill span.label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+  .filter-pill svg.chev { width: 13px; height: 13px; color: var(--text-secondary); flex-shrink: 0; transition: transform 0.15s ease; }
+  .filter-pill.open svg.chev { transform: rotate(180deg); }
+  .filter-pill.active-filter { border-color: rgba(224,168,60,0.5); color: var(--gold); }
+  .filter-pill.active-filter svg.chev { color: var(--gold); }
+
+  /* ---------- Category icon row ---------- */
+  .home-section { padding: 0 20px; }
+  .category-row { display: flex; gap: 22px; overflow-x: auto; padding: 4px 4px 16px 0; scrollbar-width: none; }
+  .category-row::-webkit-scrollbar { display: none; }
+  .category-item { display: flex; flex-direction: column; align-items: center; gap: 8px; flex-shrink: 0; cursor: pointer; touch-action: manipulation; }
+  .category-item:active .category-icon { transform: scale(0.92); }
+  .category-icon {
+    width: 56px; height: 56px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface-3); border: 1.5px solid transparent; color: var(--text-secondary);
+  }
+  .category-icon svg { width: 22px; height: 22px; }
+  .category-item.active .category-icon { border-color: var(--gold); color: var(--gold); }
+  .category-item span { font-size: 11.5px; color: var(--text-secondary); }
+  .category-item.active span { color: var(--gold); font-weight: 600; }
+
+  /* ---------- Results row ---------- */
+  .results-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 20px 14px; }
+  .results-count { font-size: 15px; font-weight: 700; }
+  .view-toggle { display: flex; background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 3px; gap: 2px; }
+  .view-toggle button { width: 36px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: var(--text-faint); }
+  .view-toggle button svg { width: 17px; height: 17px; }
+  .view-toggle button.active { background: var(--gold); color: var(--gold-text-on); }
+
+  /* ---------- Business card (list layout) ---------- */
+  .business-list-wrap { padding: 0; }
+  .business-card {
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden; margin-bottom: 14px;
+    display: flex; gap: 12px; padding: 0; align-items: stretch;
+  }
+  .business-card__image-wrap { position: relative; width: 34%; max-width: 150px; flex-shrink: 0; border-radius: 0; background: var(--surface-3); overflow: hidden; align-self: stretch; }
+  .business-card__image-wrap img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .verified-pill {
+    position: absolute; top: 6px; left: 6px; display: flex; align-items: center; gap: 4px;
+    background: var(--success-bg); color: var(--success-text); font-size: 9.5px; font-weight: 600;
+    padding: 3px 7px 3px 5px; border-radius: 999px; z-index: 2;
+  }
+  .verified-pill svg { width: 10px; height: 10px; }
+  .business-card__body { flex: 1; min-width: 0; display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 10px 10px 0; gap: 8px; }
+  .business-card__name { font-size: 15.5px; font-weight: 700; }
+  .business-card__category { font-size: 12.5px; color: var(--text-secondary); margin-top: 1px; }
+  .business-card__meta { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-secondary); margin-top: 5px; }
+  .business-card__meta svg { width: 12px; height: 12px; flex-shrink: 0; }
+  .business-card__rating { display: flex; align-items: center; gap: 4px; font-size: 12px; margin-top: 4px; }
+  .business-card__rating svg { width: 12px; height: 12px; flex-shrink: 0; }
+  .business-card__tags { display: flex; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
+  .tag { font-size: 10.5px; font-weight: 600; padding: 4px 8px; border-radius: 999px; white-space: nowrap; }
+  .tag--beauty { background: rgba(139,92,246,0.18); color: #c9b3ff; }
+  .tag--retail { background: rgba(196,106,90,0.18); color: #e3a596; }
+  .tag--realestate { background: rgba(66,133,244,0.18); color: #9dc0ff; }
+  .tag--hospitality { background: rgba(52,168,83,0.18); color: #8fe3a8; }
+  .tag--food { background: rgba(224,168,60,0.18); color: #f0cf8e; }
+  .bookmark-btn { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--gold); flex-shrink: 0; }
+  .bookmark-btn svg { width: 16px; height: 16px; }
+
+  /* ---------- Grid layout variant ---------- */
+  .business-list-wrap.grid-mode { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-mode .business-card { position: relative; flex-direction: column; padding: 8px; margin-bottom: 0; gap: 0; align-items: stretch; }
+  .grid-mode .business-card__image-wrap { position: relative; width: 100%; height: 120px; align-self: auto; border-radius: 12px; margin-bottom: 8px; }
+  .grid-mode .business-card__body { flex-direction: column; align-items: stretch; padding: 0 2px 4px; }
+  .grid-mode .business-card__name { font-size: 13.5px; }
+  .grid-mode .business-card__category { font-size: 11px; }
+  .grid-mode .business-card__tags { margin-top: 6px; }
+  .grid-mode .bookmark-btn { position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.5); z-index: 2; }
+
+  .desktop-sidebar { display: none; }
+
+  /* =====================================================================
+     DESKTOP (≥960px) — sidebar nav instead of bottom nav, content reflows
+     into a wider, multi-column layout. Mobile styles above are untouched;
+     everything below only applies at this breakpoint.
+  ===================================================================== */
+  @media (min-width: 960px) {
+    body { display: flex; }
+    .desktop-sidebar {
+      display: flex; flex-direction: column; gap: 4px;
+      position: fixed; left: 0; top: 0; bottom: 0; width: 232px;
+      padding: 24px 14px; background: var(--surface-0); border-right: 1px solid var(--border);
+      z-index: 50;
+    }
+    .desktop-sidebar__brand { display: flex; align-items: center; gap: 10px; padding: 0 10px 22px; }
+    .desktop-sidebar__brand img { width: 34px; height: 34px; }
+    .desktop-sidebar__brand-name { font-size: 17px; font-weight: 700; }
+    .desktop-sidebar a.nav-item {
+      flex: none; flex-direction: row; justify-content: flex-start; gap: 12px;
+      padding: 12px 14px; border-radius: 12px; color: var(--text-secondary); position: static;
+    }
+    .desktop-sidebar a.nav-item svg { width: 20px; height: 20px; }
+    .desktop-sidebar a.nav-item span:not(.nav-item__badge) { font-size: 14px; font-weight: 600; }
+    .desktop-sidebar a.nav-item.active { background: rgba(224,168,60,0.12); color: var(--gold); }
+    .desktop-sidebar a.nav-item:hover { background: rgba(255,255,255,0.05); }
+    .desktop-sidebar a.nav-item .nav-item__badge { position: static; margin-left: auto; }
+
+    .bottom-nav { display: none !important; }
+
+    .app-shell { max-width: 1080px; margin: 0 0 0 232px; padding-bottom: 40px; min-height: 100vh; }
+    .home-search { margin-left: 32px; margin-right: 32px; }
+    .home-section { padding: 0 32px; }
+    .results-row { padding: 4px 32px 14px; }
+    .app-header { padding: 24px 32px 14px; }
+
+    #business-list.business-list-wrap:not(.grid-mode) {
+      display: grid !important; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)) !important; gap: 14px !important;
+    }
+    #business-list.business-list-wrap.grid-mode {
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+    }
+  }
+  .business-card__image-wrap.img-error { display: flex; align-items: center; justify-content: center; }
+  .business-card__image-wrap.img-error img { display: none; }
+  .business-card__image-wrap.img-error::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(135deg, var(--surface-4), var(--surface-2));
+  }
+
+  /* ---------- Bottom nav ---------- */
+  .bottom-nav {
+    position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%);
+    width: calc(100% - 24px); max-width: 366px; height: 66px;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 22px; display: flex; align-items: center;
+    justify-content: space-around; padding: 0 6px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+    z-index: 100;
+  }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; color: var(--text-secondary); font-size: 10.5px; font-weight: 500; position: relative; }
+  .nav-item svg { width: 22px; height: 22px; }
+  .nav-item.active { color: var(--gold); }
+  .nav-item__badge {
+    position: absolute; top: -6px; right: 12px; min-width: 16px; height: 16px; padding: 0 4px;
+    border-radius: 999px; background: var(--gold); color: var(--gold-text-on); font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-fab { justify-content: flex-start; }
+  .nav-fab__circle {
+    width: 50px; height: 50px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #f0bd5a, #d99a2b);
+    display: flex; align-items: center; justify-content: center;
+    margin-top: -30px;
+    box-shadow: 0 6px 18px rgba(224,168,60,0.45), 0 0 0 5px var(--surface-1);
+  }
+  .nav-fab__circle svg { width: 24px; height: 24px; color: var(--gold-text-on); }
+
+  #no-results { display: none; text-align: center; padding: 30px 0; color: var(--text-faint); font-size: 13.5px; }
+
+  /* ---------- Loading state ---------- */
+  .loading-state {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 50px 0; color: var(--text-secondary); font-size: 13.5px; font-weight: 600;
+  }
+  .loading-spinner {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid rgba(224,168,60,0.25); border-top-color: var(--gold);
+    animation: spin 0.7s linear infinite; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- Light-mode overrides: category tags (same fix as home.html) ---------- */
+  [data-theme="light"] .tag--beauty { background: #F0E9FF; color: #6D28D9; }
+  [data-theme="light"] .tag--retail { background: #FBEAE7; color: #B0473A; }
+  [data-theme="light"] .tag--realestate { background: #E8F0FE; color: #1D4ED8; }
+  [data-theme="light"] .tag--hospitality { background: #E7F6EC; color: #15803D; }
+  [data-theme="light"] .tag--food { background: #FCF1DE; color: #A9660D; }
+  [data-theme="light"] .business-card,
+  [data-theme="light"] .dropdown-panel { box-shadow: 0 1px 3px rgba(30,20,60,0.05); }
+</style>
+</head>
+<body>
+
+<nav class="desktop-sidebar">
+  <div class="desktop-sidebar__brand">
+    <img src="logo.png" alt="" onerror="this.style.display='none'">
+    <span class="desktop-sidebar__brand-name">NeilNest</span>
+  </div>
+  <a href="home.html" class="nav-item" data-page="home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
+    <span>Home</span>
+  </a>
+  <a href="directory.html" class="nav-item active" data-page="directory">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    <span>Directory</span>
+  </a>
+  <a href="add-business.html" class="nav-item" data-page="add-business">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
+    <span>Add Business</span>
+  </a>
+  <a href="messages.html" class="nav-item" data-page="messages" style="position:relative;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v12H8l-4 4V4z"/></svg>
+    <span>Messages</span>
+    <span class="nav-item__badge">2</span>
+  </a>
+  <a href="business-profile.html" class="nav-item" data-page="profile">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+    <span>Profile</span>
+  </a>
+</nav>
+
+<div class="app-shell">
+
+  <header class="app-header">
+    <div class="app-header__brand">
+      <svg class="app-header__logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#f0c25c"/><stop offset="100%" stop-color="#d99a2b"/>
+          </linearGradient>
+          <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#8a6cff"/><stop offset="100%" stop-color="#5a3ccf"/>
+          </linearGradient>
+        </defs>
+        <path d="M10 46 L10 18 L32 40 L32 46 L10 46 Z" fill="url(#purpleGrad)"/>
+        <path d="M10 18 L18 18 L54 46 L46 46 L10 18 Z" fill="url(#goldGrad)"/>
+        <path d="M32 24 L54 46 L54 18 L46 18 L46 30 L32 18 Z" fill="url(#goldGrad)"/>
+      </svg>
+      <div>
+        <div class="app-header__title">NeilNest</div>
+        <div class="app-header__tagline">Connect. Grow. Thrive.</div>
+      </div>
+    </div>
+    <div class="app-header__actions">
+      <button class="icon-btn" id="bellBtn">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+        <span class="badge-dot" id="bellBadge">3</span>
+      </button>
+      <button class="avatar-wrap" id="avatarBtn" style="background:none;">
+        <div class="avatar-initials" id="avatarInitials">–</div>
+        <span class="avatar-online-dot"></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="dropdown-panel notif-panel" id="notifPanel">
+    <div class="notif-panel__head">Notifications</div>
+    <div id="notifList"><div class="notif-empty" style="padding:20px 16px;text-align:center;font-size:12.5px;color:var(--text-faint);">Loading…</div></div>
+  </div>
+
+  <div class="dropdown-panel profile-menu" id="profileMenu">
+    <a href="business-profile.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      View Profile
+    </a>
+    <a href="settings.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9M4.6 9a1.7 1.7 0 0 0-.3-1.9"/></svg>
+      Settings
+    </a>
+    <hr>
+    <a href="#" class="danger" id="logoutBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      Log Out
+    </a>
+  </div>
+
+  <div class="page-title-block">
+    <div class="page-title">Directory</div>
+    <div class="page-subtitle">Find and connect with verified businesses.</div>
+  </div>
+
+  <div class="home-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+    <input type="text" id="searchInput" placeholder="Search businesses, products or services...">
+    <div class="divider"></div>
+    <button class="icon-btn filter-icon" id="searchFilterBtn" style="width:auto; height:auto; padding:0;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M8 12h12M4 18h8"/><circle cx="6" cy="6" r="1.6" fill="currentColor"/><circle cx="16" cy="12" r="1.6" fill="currentColor"/><circle cx="10" cy="18" r="1.6" fill="currentColor"/></svg>
+    </button>
+  </div>
+
+  <div class="filter-row">
+    <div class="filter-pill-wrap">
+      <button class="filter-pill" id="categoriesBtn">
+        <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span class="label" id="categoriesLabel">Categories</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="dropdown-panel picker-panel" id="categoriesPanel">
+        <button type="button" class="cat-option selected" data-cat="All">All Categories<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+        <button type="button" class="cat-option" data-cat="Real Estate">Real Estate<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+        <button type="button" class="cat-option" data-cat="Hospitality">Hospitality<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+        <button type="button" class="cat-option" data-cat="Beauty">Beauty<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+        <button type="button" class="cat-option" data-cat="Retail">Retail<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+        <button type="button" class="cat-option" data-cat="Food & Beverages">Food &amp; Beverages<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+      </div>
+    </div>
+
+    <div class="filter-pill-wrap">
+      <button class="filter-pill" id="locationBtn">
+        <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        <span class="label" id="locationLabel">Location</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="dropdown-panel picker-panel" id="locationPanel">
+        <button type="button" class="loc-option selected" data-loc="All">All Locations<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+        <button type="button" class="loc-option" data-loc="Ikeja">Ikeja, Lagos<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+        <button type="button" class="loc-option" data-loc="Lekki">Lekki, Lagos<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+        <button type="button" class="loc-option" data-loc="Victoria Island">Victoria Island, Lagos<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+        <button type="button" class="loc-option" data-loc="Surulere">Surulere, Lagos<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+        <button type="button" class="loc-option" data-loc="Ikoyi">Ikoyi, Lagos<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+        <button type="button" class="loc-option" data-loc="Abuja">Abuja<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+      </div>
+    </div>
+
+    <div class="filter-pill-wrap">
+      <button class="filter-pill" id="sortBtn">
+        <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 4v16M7 4l-3 3M7 4l3 3M17 20V4M17 20l-3-3M17 20l3-3"/></svg>
+        <span class="label" id="sortLabel">Sort</span>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="dropdown-panel picker-panel" id="sortPanel" style="left:auto; right:0;">
+        <button type="button" class="sort-option selected" data-sort="featured">Featured<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+        <button type="button" class="sort-option" data-sort="rating">Highest rated<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+        <button type="button" class="sort-option" data-sort="reviews">Most reviewed<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+        <button type="button" class="sort-option" data-sort="verified">Verified only<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+        <button type="button" class="sort-option" data-sort="az">Name A–Z<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12l5 5 9-10"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="home-section">
+    <div class="category-row">
+      <div class="category-item active" data-cat="All">
+        <div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+        <span>All</span>
+      </div>
+      <div class="category-item" data-cat="Real Estate">
+        <div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9h4v-6h6v6h4v-9"/></svg></div>
+        <span>Real Estate</span>
+      </div>
+      <div class="category-item" data-cat="Hospitality">
+        <div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 20h18"/><path d="M5 20V9l7-5 7 5v11"/><circle cx="12" cy="13" r="2"/></svg></div>
+        <span>Hospitality</span>
+      </div>
+      <div class="category-item" data-cat="Beauty">
+        <div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="9" r="3"/><path d="M4 20c0-3 2.5-5 5-5s5 2 5 5"/><path d="M17 6l1.5 3L21 10l-2.5 1L17 14l-1.5-3L13 10l2.5-1z"/></svg></div>
+        <span>Beauty</span>
+      </div>
+      <div class="category-item" data-cat="Retail">
+        <div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 8h12l-1 12H7z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></div>
+        <span>Retail</span>
+      </div>
+      <div class="category-item" data-cat="__more" id="moreCatBtn">
+        <div class="category-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="19" cy="12" r="1.4" fill="currentColor"/></svg></div>
+        <span>More</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="results-row">
+    <div class="results-count" id="resultsCount">Loading businesses…</div>
+    <div class="view-toggle">
+      <button id="gridViewBtn" aria-label="Grid view">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      </button>
+      <button class="active" id="listViewBtn" aria-label="List view">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="home-section">
+    <div class="business-list-wrap" id="business-list"></div>
+    <div id="no-results">No businesses match this filter yet.</div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="home.html" class="nav-item" data-page="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
+      <span>Home</span>
+    </a>
+    <a href="directory.html" class="nav-item active" data-page="directory">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      <span>Directory</span>
+    </a>
+    <a href="add-business.html" class="nav-item nav-fab" data-page="add-business" aria-label="Add Business">
+      <span class="nav-fab__circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+      </span>
+    </a>
+    <a href="messages.html" class="nav-item" data-page="messages" style="position:relative;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v12H8l-4 4V4z"/></svg>
+      <span>Messages</span>
+      <span class="nav-item__badge">2</span>
+    </a>
+    <a href="business-profile.html" class="nav-item" data-page="profile">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+</div>
+
+<script>
+  // =========================================================================
+  // Business data. Each object drives the card render exactly like home.
+  // =========================================================================
+  // Real businesses come from Firestore now — populated and re-rendered live
+  // by startBusinessListener() below. See CATEGORY_TAXONOMY for how each
+  // business's free-text `category` maps to filter chips / colored tags.
+  let businesses = [];
+
+  const CATEGORY_TAXONOMY = [
+    { test: /real estate|apartment|shortlet|property|estate agency|coworking/i, filterCat: "Real Estate", tag: { label: "Real Estate", cls: "realestate" } },
+    { test: /hotel|hospitality|bar\b|lounge|gym|fitness|studio|photography|event/i, filterCat: "Hospitality", tag: { label: "Hospitality", cls: "hospitality" } },
+    { test: /beauty|salon|spa|fragrance|cosmetic|makeup|skincare/i, filterCat: "Beauty", tag: { label: "Beauty", cls: "beauty" } },
+    { test: /retail|boutique|store|shop|fashion|electronics|gadget/i, filterCat: "Retail", tag: { label: "Retail", cls: "retail" } },
+    { test: /food|restaurant|bakery|catering|grill|kitchen|cafe/i, filterCat: "Food & Beverages", tag: { label: "Food & Beverages", cls: "food" } }
+  ];
+
+  function deriveTagsAndFilters(categoryText) {
+    const matches = CATEGORY_TAXONOMY.filter((c) => c.test.test(categoryText || ""));
+    if (matches.length === 0) {
+      return { tags: [{ label: categoryText || "Business", cls: "retail" }], filterCats: [] };
+    }
+    return { tags: matches.map((m) => m.tag), filterCats: matches.map((m) => m.filterCat) };
+  }
+
+  function mapBusinessDoc(doc) {
+    const d = doc.data();
+    const city = d.location && d.location.city;
+    const { tags, filterCats } = deriveTagsAndFilters(d.category);
+    return {
+      id: doc.id,
+      name: d.name || "Untitled Business",
+      category: d.category || "",
+      location: [city, d.location && d.location.state].filter(Boolean).join(", ") || "—",
+      locKey: city || "",
+      rating: d.ratingAvg || 0,
+      reviews: d.ratingCount || 0,
+      verified: !!d.verified,
+      trustedSeller: !!d.trustedSeller,
+      image: d.coverUrl || d.logoUrl || "",
+      tags,
+      filterCats
+    };
+  }
+
+  // True until the first Firestore response (success or error) comes back.
+  let businessesLoading = true;
+
+  let businessesUnsub = null;
+  function startBusinessListener() {
+    if (businessesUnsub) businessesUnsub();
+    businessesUnsub = db.collection(COLLECTIONS.businesses)
+  .orderBy("createdAt", "desc")
+  .limit(100)
+  .onSnapshot((snap) => {
+      console.log("snapshot size:", snap.size, "docs:", snap.docs.map(d => d.id));
+      businessesLoading = false;
+      businesses = snap.docs.map(mapBusinessDoc);
+      renderBusinessList();
+    }, (err) => {
+      console.error("Businesses listener error:", err);
+      businessesLoading = false;
+      const msg = err.code === "permission-denied" ? "Can\'t load businesses \u2014 Firestore rules need to be published (see NEILNEST_FIRESTORE_REFERENCE.md)." : "Couldn\'t load businesses. Check your connection.";
+      document.getElementById("business-list").innerHTML = `<div style="padding:24px;text-align:center;color:var(--text-faint);font-size:13px;">${msg}</div>`;
+      document.getElementById("resultsCount").textContent = "0 businesses found";
+    });
+  }
+document.addEventListener("DOMContentLoaded", () => {
+    startBusinessListener();
+  });
+  function renderBusinessCard(b) {
+    return `
+      <div class="business-card" data-business-id="${b.id}" role="button" tabindex="0">
+        <div class="business-card__image-wrap">
+          <img src="${b.image}" alt="${b.name}" onerror="this.parentElement.classList.add('img-error')">
+          ${b.verified ? `<span class="verified-pill"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>Verified</span>` : ""}
+          ${b.trustedSeller ? `<span class="verified-pill" style="background:rgba(224,168,60,0.85);"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 4.8 5.3.8-3.85 3.75.9 5.3L12 14.2l-4.75 2.45.9-5.3L4.3 7.6l5.3-.8z"/></svg>Trusted</span>` : ""}
+        </div>
+        <div class="business-card__body">
+          <div>
+            <div class="business-card__name">${b.name}</div>
+            <div class="business-card__category">${b.category}</div>
+            <div class="business-card__meta">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>
+              ${b.location}
+            </div>
+            <div class="business-card__rating">
+              <svg fill="var(--gold)" viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
+              ${b.rating.toFixed(1)} (${b.reviews} reviews)
+            </div>
+            <div class="business-card__tags">
+              ${b.tags.map(t => `<span class="tag tag--${t.cls}">${t.label}</span>`).join("")}
+            </div>
+          </div>
+          <button class="bookmark-btn" onclick="event.stopPropagation(); this.classList.toggle('saved'); this.querySelector('svg').setAttribute('fill', this.classList.contains('saved') ? 'currentColor' : 'none')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12v18l-6-4-6 4V3z"/></svg>
+          </button>
+          <button class="bookmark-btn report-btn" data-report-id="${b.id}" data-report-name="${b.name.replace(/\"/g, '&quot;')}" title="Report">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4M12 17h.01M10.3 3.9L2.7 17a2 2 0 0 0 1.7 3h15.2a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+          </button>
+        </div>
+      </div>`;
+  }
+
+  let currentCategory = "All";
+  let currentLocation = "All";
+  let currentSort = "featured";
+  let searchTerm = "";
+  let viewMode = "list";
+
+  /* ---------------------------------------------------------------------
+     Product/service search — the placeholder promises "Search businesses,
+     products or services", but until now only business name/category/
+     location were ever checked. Firestore has no substring/case-insensitive
+     search, so this does a prefix match against the `nameLower` field
+     (see add-product.js — written on every product/service create AND
+     edit). Only listings saved/edited AFTER that change will be found;
+     older ones need a re-save to pick up `nameLower`.
+
+     REQUIRES, outside this file:
+     1. A Firestore index: collection group "products" (and "services"),
+        field "nameLower", ascending. Firestore will throw a "failed
+        precondition" console error with a direct link to auto-create it
+        the first time this query runs — click that link once.
+     2. A firestore.rules entry allowing the collection-group read, e.g.:
+          match /{path=**}/products/{productId} { allow read: if true; }
+          match /{path=**}/services/{serviceId} { allow read: if true; }
+        (adjust to match whatever read condition your existing per-business
+        products/services rules already use — send firestore.rules if you
+        want this wired precisely instead of copy-pasted blind.)
+  --------------------------------------------------------------------- */
+  let productMatchedBusinessIds = new Set();
+  let searchDebounceTimer = null;
+  let searchRequestToken = 0;
+
+  async function searchProductsAndServices(term) {
+    const myToken = ++searchRequestToken;
+    const t = term.toLowerCase();
+    try {
+      const [productsSnap, servicesSnap] = await Promise.all([
+        db.collectionGroup(COLLECTIONS.products).orderBy("nameLower").startAt(t).endAt(t + "\uf8ff").limit(25).get(),
+        db.collectionGroup(COLLECTIONS.services).orderBy("nameLower").startAt(t).endAt(t + "\uf8ff").limit(25).get()
+      ]);
+      if (myToken !== searchRequestToken) return; // a newer keystroke already superseded this request
+      const ids = new Set();
+      productsSnap.forEach((doc) => { const bid = doc.data().businessId; if (bid) ids.add(bid); });
+      servicesSnap.forEach((doc) => { const bid = doc.data().businessId; if (bid) ids.add(bid); });
+      productMatchedBusinessIds = ids;
+      renderBusinessList();
+    } catch (err) {
+      console.error("Product/service search error:", err);
+      // Fail open: leave business-level search working even if the
+      // collection-group query/index isn't set up yet.
+      productMatchedBusinessIds = new Set();
+      renderBusinessList();
+    }
+  }
+
+  function renderBusinessList() {
+    const container = document.getElementById("business-list");
+    const noResults = document.getElementById("no-results");
+
+    if (businessesLoading) {
+      container.className = "business-list-wrap";
+      container.innerHTML = `<div class="loading-state"><span class="loading-spinner"></span>Loading businesses…</div>`;
+      noResults.style.display = "none";
+      document.getElementById("resultsCount").textContent = "Loading businesses…";
+      return;
+    }
+
+    let list = businesses.filter((b) => currentCategory === "All" || b.filterCats.includes(currentCategory));
+    if (currentLocation !== "All") list = list.filter((b) => b.locKey === currentLocation);
+    if (searchTerm) {
+      const t = searchTerm.toLowerCase();
+      list = list.filter((b) =>
+        b.name.toLowerCase().includes(t) ||
+        b.category.toLowerCase().includes(t) ||
+        b.location.toLowerCase().includes(t) ||
+        productMatchedBusinessIds.has(b.id)
+      );
+    }
+    if (currentSort === "rating") list = [...list].sort((a, b) => b.rating - a.rating);
+    if (currentSort === "reviews") list = [...list].sort((a, b) => b.reviews - a.reviews);
+    if (currentSort === "verified") list = list.filter((b) => b.verified);
+    if (currentSort === "az") list = [...list].sort((a, b) => a.name.localeCompare(b.name));
+
+    container.className = "business-list-wrap" + (viewMode === "grid" ? " grid-mode" : "");
+    container.innerHTML = list.map(renderBusinessCard).join("");
+    noResults.style.display = list.length ? "none" : "block";
+    container.querySelectorAll(".business-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        window.location.href = `business-profile.html?id=${card.dataset.businessId}`;
+      });
+    });
+    container.querySelectorAll(".report-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openReportModal({ type: "business", targetId: btn.dataset.reportId, targetName: btn.dataset.reportName, businessId: btn.dataset.reportId });
+      });
+    });
+
+    document.getElementById("resultsCount").textContent = `${list.length} ${list.length === 1 ? "business" : "businesses"} found`;
+  }
+
+  document.getElementById("searchInput").addEventListener("input", (e) => {
+    searchTerm = e.target.value.trim();
+    renderBusinessList(); // instant feedback on the business-level match
+
+    clearTimeout(searchDebounceTimer);
+    if (!searchTerm) {
+      productMatchedBusinessIds = new Set();
+      searchRequestToken++; // invalidate any in-flight query
+      return;
+    }
+    searchDebounceTimer = setTimeout(() => searchProductsAndServices(searchTerm), 300);
+  });
+
+  // ---- Category icon row: syncs with the Categories dropdown ----
+  function setCategory(cat) {
+    currentCategory = cat;
+    document.querySelectorAll(".category-item[data-cat]").forEach((c) => c.classList.toggle("active", c.dataset.cat === cat));
+    document.querySelectorAll(".cat-option").forEach((o) => o.classList.toggle("selected", o.dataset.cat === cat));
+    const known = ["All", "Real Estate", "Hospitality", "Beauty", "Retail"];
+    document.getElementById("categoriesLabel").textContent = cat === "All" ? "Categories" : cat;
+    document.getElementById("categoriesBtn").classList.toggle("active-filter", cat !== "All");
+    if (!known.includes(cat)) {
+      document.querySelectorAll(".category-item[data-cat]").forEach((c) => c.classList.remove("active"));
+    }
+    renderBusinessList();
+  }
+
+  document.querySelectorAll(".category-item[data-cat]").forEach((item) => {
+    item.addEventListener("click", () => {
+      if (item.dataset.cat === "__more") return;
+      setCategory(item.dataset.cat);
+    });
+  });
+
+  document.querySelectorAll(".cat-option").forEach((opt) => {
+    opt.addEventListener("click", () => {
+      setCategory(opt.dataset.cat);
+      document.getElementById("categoriesPanel").classList.remove("open");
+    });
+  });
+
+  // ---- Location dropdown ----
+  document.querySelectorAll(".loc-option").forEach((opt) => {
+    opt.addEventListener("click", () => {
+      currentLocation = opt.dataset.loc;
+      document.querySelectorAll(".loc-option").forEach((o) => o.classList.remove("selected"));
+      opt.classList.add("selected");
+      document.getElementById("locationLabel").textContent = currentLocation === "All" ? "Location" : opt.textContent.replace(/[^\S ].*$/, "").trim();
+      document.getElementById("locationBtn").classList.toggle("active-filter", currentLocation !== "All");
+      document.getElementById("locationPanel").classList.remove("open");
+      renderBusinessList();
+    });
+  });
+
+  // ---- Sort dropdown ----
+  document.querySelectorAll(".sort-option").forEach((opt) => {
+    opt.addEventListener("click", () => {
+      currentSort = opt.dataset.sort;
+      document.querySelectorAll(".sort-option").forEach((o) => o.classList.remove("selected"));
+      opt.classList.add("selected");
+      const label = opt.textContent.trim();
+      document.getElementById("sortLabel").textContent = currentSort === "featured" ? "Sort" : label;
+      document.getElementById("sortBtn").classList.toggle("active-filter", currentSort !== "featured");
+      document.getElementById("sortPanel").classList.remove("open");
+      renderBusinessList();
+    });
+  });
+
+  // ---- View toggle ----
+  document.getElementById("gridViewBtn").addEventListener("click", () => {
+    viewMode = "grid";
+    document.getElementById("gridViewBtn").classList.add("active");
+    document.getElementById("listViewBtn").classList.remove("active");
+    renderBusinessList();
+  });
+  document.getElementById("listViewBtn").addEventListener("click", () => {
+    viewMode = "list";
+    document.getElementById("listViewBtn").classList.add("active");
+    document.getElementById("gridViewBtn").classList.remove("active");
+    renderBusinessList();
+  });
+
+  // ---- Generic dropdown toggle helper ----
+  function wireDropdown(btnId, panelId) {
+    const btn = document.getElementById(btnId);
+    const panel = document.getElementById(panelId);
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const willOpen = !panel.classList.contains("open");
+      document.querySelectorAll(".dropdown-panel").forEach((p) => p.classList.remove("open"));
+      document.querySelectorAll(".filter-pill").forEach((p) => p.classList.remove("open"));
+      if (willOpen) { panel.classList.add("open"); btn.classList.add("open"); }
+    });
+  }
+  wireDropdown("bellBtn", "notifPanel");
+  wireDropdown("avatarBtn", "profileMenu");
+  wireDropdown("categoriesBtn", "categoriesPanel");
+  wireDropdown("locationBtn", "locationPanel");
+  wireDropdown("sortBtn", "sortPanel");
+  wireDropdown("searchFilterBtn", "sortPanel");
+
+  // ---- Log out ----
+  document.getElementById("logoutBtn").addEventListener("click", async (e) => {
+    e.preventDefault();
+    try { await auth.signOut(); } catch (err) { console.error("Sign out error:", err); }
+    window.location.href = "signin.html";
+  });
+
+  document.addEventListener("click", () => {
+    document.querySelectorAll(".dropdown-panel").forEach((p) => p.classList.remove("open"));
+    document.querySelectorAll(".filter-pill").forEach((p) => p.classList.remove("open"));
+  });
+  document.querySelectorAll(".dropdown-panel").forEach((p) => p.addEventListener("click", (e) => e.stopPropagation()));
+
+  renderBusinessList();
+  </script>
+  
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="auth-guard.js"></script>
+<script src="trustsafety-core.js"></script>
+<script src="notifications.js"></script>
+<script src="nav-fab.js"></script>
+</body>
+</html>
